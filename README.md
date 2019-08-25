@@ -15,3 +15,15 @@ This repository provides functionality for a front-facing interface that'll perf
 The front end and scoring mechanisms are implemented in [React](https://en.wikipedia.org/wiki/React_(web_framework)) & [Javascript](https://en.wikipedia.org/wiki/JavaScript).
 
 Our serverside fucntionality for storing and updating results utilizes [Firebase](https://en.wikipedia.org/wiki/Firebase).
+
+## Troubleshooting Tips
+
+This section contains some tips for troubleshooting any installation or run-time problems. 
+
+All of the notes below stem from troubles repoted by our end users and are stored on our [wiki](https://github.com/paul-tqh-nguyen/swing_dance_scores/wiki).
+
+This list is incomplete. 
+
+Trouble Shooting Tips:
+* [Linux Lamentations](https://github.com/paul-tqh-nguyen/swing_dance_scores/wiki/Linux-Lamentations)
+
