@@ -16,6 +16,30 @@ The front end and scoring mechanisms are implemented in [React](https://en.wikip
 
 Our serverside fucntionality for storing and updating results utilizes [Firebase](https://en.wikipedia.org/wiki/Firebase).
 
+We use [Python](https://en.wikipedia.org/wiki/Python_(programming_language)) for scripting and glue code.
+
+## Instructions For Use
+
+See the sub-sections below for details on how to use the provided functionalities.
+
+### Utilizing Our Front End Interfaces
+
+We can use the following command to utilize our front end functionality.
+```
+./swing_dance_scores.py -start-front-end-server
+```
+
+This starts a server to serve our web application.
+
+Information will be printed about the URI relevant to access our web application (the URI will be something like http://localhost:3000/).
+
+### Deployment Instructions
+
+If local changes are made to the front end functionality, we can deploy them to our demo site at https://paul-tqh-nguyen.github.io/swing_dance_scores/ via the following command:
+```
+./swing_dance_scores.py -deploy
+```
+
 ## Troubleshooting Tips
 
 This section contains some tips for troubleshooting any installation or run-time problems. 
