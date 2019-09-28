@@ -41,7 +41,7 @@ class testAllWebServicesWrtAuthentication(unittest.TestCase):
         number_of_node_processes_before = get_current_number_of_node_processes()
         
         # Test firestore initilization
-        firestore_emulation_initialization_command = "cd front_end && firebase emulators:start"
+        firestore_emulation_initialization_command = "cd back_end && firebase emulators:start"
         firestore_emulation_process = subprocess.Popen(firestore_emulation_initialization_command, stdout=subprocess.PIPE, universal_newlines=True, shell=True, preexec_fn=os.setsid)
         firestore_emulation_initialization_has_timed_out = False
         def _note_firestore_emulation_initialization_timeout():

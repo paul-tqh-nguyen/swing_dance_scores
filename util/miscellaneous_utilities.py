@@ -51,6 +51,16 @@ def _raise_timeout(signum, frame):
 def random_string():
     return str(random.randint(0,2**32))
 
+def remove_duplicates(items: list) -> list:
+    '''Non-destructive uniquifier that preserves order.'''
+    seen_items = set()
+    new_items = []
+    for item in items:
+        if item not in seen_items:
+            new_items.append(item)
+            seen_items.add(item)
+    return new_items
+
 def noop(*args, **kws):
     return None
 

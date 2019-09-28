@@ -27,6 +27,8 @@ import sys
 import subprocess
 import test.test_all as test
 import unittest
+import re
+from util.miscellaneous_utilities import *
 
 ###############
 # Main Runner #
@@ -38,19 +40,85 @@ def _deploy():
 
 def _start_development_servers():
     raise NotImplementedError("Support for -start-development-servers is not yet implemented.")
-    # print()
-    # print("Please use a keyboard interrupt at anytime to exit.")
-    # print()
-    # try:
-    #     print("Installing libraries necessary for back end...")
-    #     subprocess.check_call("cd back_end/ && npm install", shell=True)
-    #     print("Starting back end server...")
-    #     print()
-    #     print("Back end interface will be available at http://localhost:3000/")
-    #     subprocess.check_call("cd back_end/ && npm start", shell=True)
-    # except KeyboardInterrupt as err:
-    #     print("\n\n")
-    #     print("Exiting back end interface.")
+    print()
+    print("Please use a keyboard interrupt at anytime to exit.")
+    print()
+    back_end_development_server_initialization_command = "cd back_end && firebase emulators:start"
+    front_end_development_server_initialization_command = "cd front_end && npm start"
+    back_end_development_server_process = None
+    front_end_development_server_process = None
+    back_end_process_output_total_text = ""
+    front_end_process_output_total_text = ""
+    def _shut_down_development_servers():
+        print("\n\n")
+        print("Shutting down development servers.")
+        if back_end_development_server_process is not None:
+            os.killpg(os.getpgid(back_end_development_server_process.pid), signal.SIGTERM)
+        if front_end_development_server_process is not None:
+            os.killpg(os.getpgid(front_end_development_server_process.pid), signal.SIGTERM)
+        print("Development servers have been shut down.")
+    def _raise_system_exit_exception_on_server_initilization_error(reason):
+        raise SystemExit("Failed to start front or back end server for the following reason: {reason}".format(reason=reason))
+    def _raise_system_exit_exception_on_server_initilization_time_out_error():
+        _raise_system_exit_exception_on_server_initilization_error("Server initialization timedout.")
+    try:
+        print("Installing libraries necessary for back end...")
+        subprocess.check_call("cd back_end/ && npm install", shell=True)
+        print("Installing libraries necessary for front end...")
+        subprocess.check_call("cd front_end/ && npm install", shell=True)
+        print("Starting front and back end server...")
+        back_end_development_server_process = subprocess.Popen(back_end_development_server_initialization_command, stdout=subprocess.PIPE, universal_newlines=True, shell=True, preexec_fn=os.setsid)
+        front_end_development_server_process = subprocess.Popen(front_end_development_server_initialization_command, stdout=subprocess.PIPE, universal_newlines=True, shell=True,
+                                                                preexec_fn=os.setsid)
+        # start back end server
+        with timeout(30, _raise_system_exit_exception_on_server_initilization_time_out_error):
+            back_end_initialization_has_completed = False
+            while (not back_end_initialization_has_completed):
+                back_end_output_line = back_end_development_server_process.stdout.readline()
+                back_end_process_output_total_text += back_end_output_line
+                if "All emulators started, it is now safe to connect." in firestore_emulation_process_text_output_line:
+                    back_end_initialization_has_completed = True
+                elif "could not start firestore emulator" in firestore_emulation_process_text_output_line:
+                    reason = "Could not start back end server.\n\nThe following was the output of the back end server initialization process:\n{process_output_text}".format(
+                        process_output_text=back_end_process_output_total_text)
+                    _raise_system_exit_exception_on_server_initilization_error(reason)
+        # start front end server        
+        with timeout(30, _raise_system_exit_exception_on_server_initilization_time_out_error):
+            front_end_initialization_has_completed = False
+            local_front_end_url = None
+            network_front_end_url = None
+            while (not front_end_initialization_has_completed):
+                front_end_output_line = front_end_development_server_process.stdout.readline()
+                front_end_process_output_total_text += front_end_output_line
+                local_url_line_pattern = " +Local: +.*"
+                local_url_line_pattern_matches = re.findall(local_url_line_pattern, front_end_output_line)
+                if len(local_url_line_pattern_matches) == 1:
+                    local_front_end_url = local_url_line_pattern_matches[0].replace("Local:","").strip()
+                    print("The front end can be found locally at {local_front_end_url}".format(local_front_end_url=local_front_end_url))
+                    continue
+                network_url_line_pattern = " +On Your Network: +.*"
+                network_url_line_pattern_matches = re.findall(network_url_line_pattern, front_end_output_line)
+                if len(network_url_line_pattern_matches) == 1:
+                    network_front_end_url = network_url_line_pattern_matches[0].replace("On Your Network:","").strip()
+                    print("The front end can be found on your network at {network_front_end_url}".format(network_front_end_url=network_front_end_url))
+                    front_end_initialization_has_completed = True
+        print()
+    except SystemExit as error:
+        print()
+        print("We encountered an error.")
+        print()
+        print("Perhaps the output of the back end server initialization might be helpful...")
+        print()
+        print(back_end_process_output_total_text)
+        print()
+        print("Perhaps the output of the front end server initialization might be helpful...")
+        print()
+        print(front_end_process_output_total_text)
+        print()
+        _shut_down_development_servers()
+        sys.exit(1)
+    except KeyboardInterrupt as err:
+        _shut_down_development_servers()
     return None
 
 def _run_tests():
@@ -97,7 +165,7 @@ def _determine_single_process_specified_by_args(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-start-development-servers', action='store_true', help="Start our backend and front end servers for development purposes.")
+    parser.add_argument('-start-development-servers', action='store_true', help="Start our back end and front end servers for development purposes.")
     parser.add_argument('-run-tests', action='store_true', help="To run all of the tests.")
     parser.add_argument('-deploy', action='store_true', help="To deploy local changes to our demo site at https://paul-tqh-nguyen.github.io/swing_dance_scores/.")
     args = parser.parse_args()
