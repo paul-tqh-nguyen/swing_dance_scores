@@ -4,7 +4,7 @@
 
 Top Level Interface for swing_dance_scores
 
-See https://github.com/paul-tqh-nguyen/swing_dance_scores for more details wrt use.
+Run this file directly and see the CLI's --help documentation for further details.
 
 Owner : paul-tqh-nguyen
 
@@ -25,6 +25,8 @@ File Organization:
 import argparse
 import sys
 import subprocess
+import test.test_all as test
+import unittest
 
 ###############
 # Main Runner #
@@ -34,7 +36,7 @@ def _deploy():
     raise NotImplementedError("Support for -deploy is not yet implemented.")
     return None
 
-def _start_front_end_server():
+def _start_front_end_development_server():
     print()
     print("Please use a keyboard interrupt at anytime to exit.")
     print()
@@ -50,17 +52,25 @@ def _start_front_end_server():
         print("Exiting front end interface.")
     return None
 
-VALID_SPECIFIABLE_PROCESSES = ["start_front_end_server","deploy"]
+def _run_tests():
+    test.run_all_tests()
+    return None
+
+VALID_SPECIFIABLE_PROCESSES_TO_RELEVANT_PROCESS_METHOD_MAP = {
+    "start_front_end_development_server": _start_front_end_development_server,
+    "deploy": _deploy,
+    "run_tests": _run_tests,
+}
 
 def _determine_all_processes_specified_by_script_args(args):
     arg_to_value_map = vars(args)
     processes_specified = []
     for arg, value in arg_to_value_map.items():
-        if (arg == "start_front_end_server" and value == True) or \
-           (arg == "deploy" and value == True):
-            processes_specified.append(arg)
-        elif not arg in VALID_SPECIFIABLE_PROCESSES:
-            raise SystemExit("Cannot handle input arg {bad_arg}.".format(bad_arg=arg))
+        if value == True: 
+            if (arg in VALID_SPECIFIABLE_PROCESSES_TO_RELEVANT_PROCESS_METHOD_MAP):
+                processes_specified.append(arg)
+            else:
+                raise SystemExit("Cannot handle input arg {bad_arg}.".format(bad_arg=arg))
     return processes_specified
 
 def _determine_single_process_specified_by_args(args):
@@ -73,7 +83,7 @@ def _determine_single_process_specified_by_args(args):
         processes_string = "{first_processes_string}{last_process_string}".format(first_processes_string=first_processes_string, last_process_string=last_process_string)
         raise SystemExit("The input args specified multiple conflicting processes. Please select only one of {processes_string}.".format(processes_string=processes_string))
     elif number_of_processes_specified == 0:
-        all_possible_processes = VALID_SPECIFIABLE_PROCESSES
+        all_possible_processes = list(VALID_SPECIFIABLE_PROCESSES_TO_RELEVANT_PROCESS_METHOD_MAP.keys())
         first_processes_string = ", ".join(all_possible_processes[:-1])
         last_process_string = ", or {last_process}".format(last_process=all_possible_processes[-1])
         string_for_all_possible_processes = "{first_processes_string}{last_process_string}".format(first_processes_string=first_processes_string, last_process_string=last_process_string)
@@ -86,7 +96,8 @@ def _determine_single_process_specified_by_args(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-start-front-end-server', action='store_true', help="To simply use our front end interface.")
+    parser.add_argument('-start-front-end-development-server', action='store_true', help="To use our front end interface.")
+    parser.add_argument('-run-tests', action='store_true', help="To run all of the tests.")
     parser.add_argument('-deploy', action='store_true', help="To deploy local front end changes to our demo site at https://paul-tqh-nguyen.github.io/swing_dance_scores/.")
     args = parser.parse_args()
     try:
@@ -96,14 +107,10 @@ def main():
         print()
         parser.print_help()
         sys.exit(1)
-    if process is None:
+    if not process in VALID_SPECIFIABLE_PROCESSES_TO_RELEVANT_PROCESS_METHOD_MAP:
         raise SystemExit("Input args to swing_dance_scores.py are invalid.")
-    elif process == "start_front_end_server":
-        _start_front_end_server()
-    elif process == "deploy":
-        _deploy()
     else:
-        raise SystemExit("Unexpected case reached. Please report an issue to https://github.com/paul-tqh-nguyen/swing_dance_scores stating that swing_dance_scores.py could not handle the args specified by {args}.".format(args=args))
+        VALID_SPECIFIABLE_PROCESSES_TO_RELEVANT_PROCESS_METHOD_MAP[process]()
     return None
 
 if __name__ == '__main__':
