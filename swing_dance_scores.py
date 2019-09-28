@@ -36,20 +36,21 @@ def _deploy():
     raise NotImplementedError("Support for -deploy is not yet implemented.")
     return None
 
-def _start_front_end_development_server():
-    print()
-    print("Please use a keyboard interrupt at anytime to exit.")
-    print()
-    try:
-        print("Installing libraries necessary for front end...")
-        subprocess.check_call("cd front_end/ && npm install", shell=True)
-        print("Starting front end server...")
-        print()
-        print("Front end interface will be available at http://localhost:3000/")
-        subprocess.check_call("cd front_end/ && npm start", shell=True)
-    except KeyboardInterrupt as err:
-        print("\n\n")
-        print("Exiting front end interface.")
+def _start_development_servers():
+    raise NotImplementedError("Support for -start-development-servers is not yet implemented.")
+    # print()
+    # print("Please use a keyboard interrupt at anytime to exit.")
+    # print()
+    # try:
+    #     print("Installing libraries necessary for back end...")
+    #     subprocess.check_call("cd back_end/ && npm install", shell=True)
+    #     print("Starting back end server...")
+    #     print()
+    #     print("Back end interface will be available at http://localhost:3000/")
+    #     subprocess.check_call("cd back_end/ && npm start", shell=True)
+    # except KeyboardInterrupt as err:
+    #     print("\n\n")
+    #     print("Exiting back end interface.")
     return None
 
 def _run_tests():
@@ -57,7 +58,7 @@ def _run_tests():
     return None
 
 VALID_SPECIFIABLE_PROCESSES_TO_RELEVANT_PROCESS_METHOD_MAP = {
-    "start_front_end_development_server": _start_front_end_development_server,
+    "start_development_servers": _start_development_servers,
     "deploy": _deploy,
     "run_tests": _run_tests,
 }
@@ -96,9 +97,9 @@ def _determine_single_process_specified_by_args(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-start-front-end-development-server', action='store_true', help="To use our front end interface.")
+    parser.add_argument('-start-development-servers', action='store_true', help="Start our backend and front end servers for development purposes.")
     parser.add_argument('-run-tests', action='store_true', help="To run all of the tests.")
-    parser.add_argument('-deploy', action='store_true', help="To deploy local front end changes to our demo site at https://paul-tqh-nguyen.github.io/swing_dance_scores/.")
+    parser.add_argument('-deploy', action='store_true', help="To deploy local changes to our demo site at https://paul-tqh-nguyen.github.io/swing_dance_scores/.")
     args = parser.parse_args()
     try:
         process = _determine_single_process_specified_by_args(args)

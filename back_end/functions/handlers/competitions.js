@@ -56,7 +56,7 @@ const competitionModificationAuthenticationCheck = (request, response, next) => 
     const competitionDocument = db.doc(`/competitions/${request.params.competitionId}`);
 };
 
-exports.deleteCompetition = (request, response) => { // @todo make this api signature consisten with the others and have all params in the body
+exports.deleteCompetition = (request, response) => { // @todo make this api signature consistent with the others and have all params in the body
     const competitionDocument = db.doc(`/competitions/${request.params.competitionId}`);    competitionDocument.get()
         .then(doc => {
             if (!doc.exists) {
