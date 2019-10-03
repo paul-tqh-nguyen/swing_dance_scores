@@ -28,6 +28,8 @@ import subprocess
 import test.test_all as test
 import unittest
 import re
+import datetime
+import time
 from util.miscellaneous_utilities import *
 
 ###############
@@ -39,7 +41,6 @@ def _deploy():
     return None
 
 def _start_development_servers():
-    raise NotImplementedError("Support for -start-development-servers is not yet implemented.")
     print()
     print("Please use a keyboard interrupt at anytime to exit.")
     print()
@@ -76,9 +77,9 @@ def _start_development_servers():
             while (not back_end_initialization_has_completed):
                 back_end_output_line = back_end_development_server_process.stdout.readline()
                 back_end_process_output_total_text += back_end_output_line
-                if "All emulators started, it is now safe to connect." in firestore_emulation_process_text_output_line:
+                if "All emulators started, it is now safe to connect." in back_end_output_line:
                     back_end_initialization_has_completed = True
-                elif "could not start firestore emulator" in firestore_emulation_process_text_output_line:
+                elif "could not start firestore emulator" in back_end_output_line:
                     reason = "Could not start back end server.\n\nThe following was the output of the back end server initialization process:\n{process_output_text}".format(
                         process_output_text=back_end_process_output_total_text)
                     _raise_system_exit_exception_on_server_initilization_error(reason)
@@ -102,19 +103,28 @@ def _start_development_servers():
                     network_front_end_url = network_url_line_pattern_matches[0].replace("On Your Network:","").strip()
                     print("The front end can be found on your network at {network_front_end_url}".format(network_front_end_url=network_front_end_url))
                     front_end_initialization_has_completed = True
+        print("\nBack end and front end servers initialized at {time}".format(time=datetime.datetime.now()))
+        start_time=time.time()
+        time_of_last_ping = start_time
+        while True:
+            elapsed_time_since_last_ping = time.time() - time_of_last_ping
+            if elapsed_time_since_last_ping > 3600:
+                print("It has been {num_hours} hours since the front and back end servers started.".format(num_hours=int((time.time()-start_time)/3600)))
+                time_of_last_ping = time.time()
         print()
     except SystemExit as error:
-        print()
-        print("We encountered an error.")
-        print()
-        print("Perhaps the output of the back end server initialization might be helpful...")
-        print()
-        print(back_end_process_output_total_text)
-        print()
-        print("Perhaps the output of the front end server initialization might be helpful...")
-        print()
-        print(front_end_process_output_total_text)
-        print()
+        print('''We encountered an error.
+
+{error}
+
+Perhaps the output of the back end server initialization might be helpful...
+
+{back_end_process_output_total_text}
+
+Perhaps the output of the front end server initialization might be helpful...
+
+{front_end_process_output_total_text}
+'''.format(error=error, back_end_process_output_total_text=back_end_process_output_total_text, front_end_process_output_total_text=front_end_process_output_total_text))
         _shut_down_development_servers()
         sys.exit(1)
     except KeyboardInterrupt as err:
