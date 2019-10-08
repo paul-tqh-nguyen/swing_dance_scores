@@ -104,6 +104,8 @@ def _start_development_servers():
                     print("The front end can be found on your network at {network_front_end_url}".format(network_front_end_url=network_front_end_url))
                     front_end_initialization_has_completed = True
         print("\nBack end and front end servers initialized at {time}".format(time=datetime.datetime.now()))
+        print("\n\nHere's the back end server initialization output:\n\n{back_end_process_output_total_text}\n\n".format(back_end_process_output_total_text=back_end_process_output_total_text))
+        print("\n\nHere's the front end server initialization output:\n\n{front_end_process_output_total_text}\n\n".format(front_end_process_output_total_text=front_end_process_output_total_text))
         start_time=time.time()
         time_of_last_ping = start_time
         while True:

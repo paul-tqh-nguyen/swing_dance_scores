@@ -59,7 +59,9 @@ const lastArrayElement = (array) => { // @todo move to helper file
     return array[array.length-1];
 };
 
+const cors = require('cors')({origin: true});
 exports.login = (request, response) => {
+    cors(request, response, () => {});
     const user = {
         email: request.body.email,
         password: request.body.password,
@@ -68,12 +70,14 @@ exports.login = (request, response) => {
     if (Object.keys(errors).length>0) {
         return response.status(400).json(errors);
     }
+    let refreshToken;
     firebase.auth().signInWithEmailAndPassword(user.email, user.password)
         .then(data => {
+            refreshToken = data.user.refreshToken;
             return data.user.getIdToken();
         })
         .then(token => {
-            return response.json({token: token});
+            return response.json({token: token, refreshToken: refreshToken});
         })
         .catch(err => {
             console.error(err);

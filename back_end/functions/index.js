@@ -5,6 +5,9 @@ const { firebaseConfig } = require('./util/config.js');
 const firebase = require('firebase');
 firebase.initializeApp(firebaseConfig);
 
+const cors = require('cors');
+app.use(cors());
+
 // Competitions
 const { getAllCompetitions, postOneCompetition, findCompetition, deleteCompetition } = require('./handlers/competitions');
 const { FBAuth } = require('./util/fbAuth');
