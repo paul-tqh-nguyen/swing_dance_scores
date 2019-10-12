@@ -64,9 +64,7 @@ class testAllWebServicesEndToEnd(unittest.TestCase):
         self.assertTrue(isinstance(all_competitions,list), msg="The response from the endpoint at {get_all_competitions_uri} didn't return JSON content of the correct type (we expected a list). We got the following: \n\n{all_competitions_json_string}\n\n".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions_json_string=all_competitions_json_string))
         self.assertEqual(len(all_competitions), 0, msg="The response from the endpoint at {get_all_competitions_uri} didn't return an empty list. We expect there to be no competitions so far as the firestore emulator was just initialized.".format(get_all_competitions_uri=get_all_competitions_uri))
         
-        test_handle = "test_user_{timestamp}".format(timestamp=str(time.time()))
-        test_email = "{test_handle}@email.com".format(test_handle=test_handle)
-        test_password = random_string()
+        test_handle, test_email, test_password = generate_new_test_email_and_password_and_user_handle()
         
         # Test signup endpoint
         signup_uri = urllib.parse.urljoin(api_base_uri_string, "signup")
@@ -173,6 +171,11 @@ class testAllWebServicesEndToEnd(unittest.TestCase):
         self.assertEqual(number_of_node_processes_before, number_of_node_processes_after, msg="There is a differnet number of node.js processes existing before and after this test, which may signal that the firebase emulator used during this test is still running.")
         self.assertNotEqual(number_of_node_processes_during, number_of_node_processes_before, msg="The number of node.js processes during the test run and before the test run is the same, which may signal that the firebase emulator was not initialized during the test run.")
         self.assertNotEqual(number_of_node_processes_during, number_of_node_processes_after, msg="The number of node.js processes during the test run and after the test run is the same, which may signal that the firebase emulator was not initialized during the test run.")
+
+        # Test that we didn't pollute the DB with an unecessary number of users
+        delete_test_user_from_production_db_via_email(test_email)
+        self.assertTrue(len(list(all_test_user_emails_in_production_db())) < MAX_NUMBER_OF_TOLERABLE_TEST_USERS,
+                        "There are too many test users in the production database. A clean up is necessary.")
 
 
 ###############

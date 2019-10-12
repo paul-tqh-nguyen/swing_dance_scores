@@ -168,3 +168,31 @@ exports.getUserData = (request, response) => {
             return response.status(500).json({ error: err.code });
         });
 };
+
+exports.deleteUser = (request, response) => {
+    const user = {
+        email: request.body.email,
+        password: request.body.password,
+    };
+    let errors = loginValidationErrors(user);
+    if (Object.keys(errors).length>0) {
+        return response.status(400).json(errors);
+    }
+    firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+        .then(data => {
+            let currentUser = firebase.auth().currentUser;
+            return currentUser.delete();
+        })
+        .then(() => {
+            // @todo is this status code right? should we use a put or update instead of a post for this?
+            return response.status(200).json({message: "User deleted successfully."});
+        })
+        .catch(err => {
+            console.error(err);
+            if (err.code === "auth/wrong-password") {
+                return response.status(403).json({ general: "Wrong credentials; cannot delete user."});
+            }
+            return response.status(500).json({error: err.code});
+        });
+    return null;
+};

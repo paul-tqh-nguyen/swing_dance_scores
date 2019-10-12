@@ -22,12 +22,57 @@ File Organization:
 ###########
 
 import sys; sys.path.append(".."); from util.miscellaneous_utilities import *
+import firebase_admin
+from firebase_admin import auth
 import subprocess
+import time
 import re
+import os
 
 ##################
 # Test Utilities #
 ##################
+
+TEST_EMAIL_PREFIX = "test_user_"
+TEST_EMAIL_DOMAIN = "test.email.com"
+
+def string_strongly_resembles_test_generated_email(string: str):
+    matches = re.findall("^{test_email_prefix}.+{test_email_domain}$".format(test_email_prefix=TEST_EMAIL_PREFIX, test_email_domain=TEST_EMAIL_DOMAIN), string)
+    return len(matches) > 0
+
+# Initialize the app ONCE
+package_directory = os.path.dirname(os.path.abspath(__file__))
+service_account_key_json_absolute_location = os.path.join(package_directory,"serviceAccountKey.json")
+cred = firebase_admin.credentials.Certificate(service_account_key_json_absolute_location)
+firebase_admin.initialize_app(cred)
+
+def all_uids():
+    page = auth.list_users()
+    while page:
+        for user in page.users:
+            yield user.uid
+        page = page.get_next_page()
+
+MAX_NUMBER_OF_TOLERABLE_TEST_USERS = 1 # this should be at most the number of current developers on this project
+
+def all_test_user_emails_in_production_db():
+    page = auth.list_users()
+    for uid in all_uids():
+        user = auth.get_user(uid)
+        email = user.email
+        if string_strongly_resembles_test_generated_email(email):
+            yield email
+
+def delete_test_user_from_production_db_via_email(email):
+    if string_strongly_resembles_test_generated_email(email):
+        user = auth.get_user_by_email(email)
+        auth.delete_user(user.uid)
+
+def generate_new_test_email_and_password_and_user_handle():
+    test_handle = "{test_email_prefix}{timestamp}".format(test_email_prefix=TEST_EMAIL_PREFIX, timestamp=str(time.time()))
+    test_email = "{test_handle}@{test_email_domain}".format(test_email_domain=TEST_EMAIL_DOMAIN, test_handle=test_handle)
+    test_password = random_string()
+    return (test_handle, test_email, test_password)
 
 def get_current_number_of_node_processes():
     ps_e_bash_output = subprocess.run(["ps","-e"], capture_output=True, text=True).stdout
