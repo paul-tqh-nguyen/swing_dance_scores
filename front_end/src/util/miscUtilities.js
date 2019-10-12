@@ -1,3 +1,10 @@
+export function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(window.location.search);
+    let urlParameter = results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    return urlParameter;
+};
 
 /*
 var assert = require('assert');

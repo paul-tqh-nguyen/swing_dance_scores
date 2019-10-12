@@ -59,9 +59,7 @@ const lastArrayElement = (array) => { // @todo move to helper file
     return array[array.length-1];
 };
 
-const cors = require('cors')({origin: true});
 exports.login = (request, response) => {
-    cors(request, response, () => {});
     const user = {
         email: request.body.email,
         password: request.body.password,

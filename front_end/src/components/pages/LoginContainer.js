@@ -3,9 +3,9 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
-import {loginUser} from '../redux/actions';
+import {loginUser} from '../../redux/actions';
 
-class LoginPage extends Component {
+class LoginContainer extends Component {
     constructor() {
         super();
         this.state = {
@@ -24,7 +24,7 @@ class LoginPage extends Component {
         event.preventDefault();
         const userData = {
             email: this.state.email,
-            password: this.state.password
+            password: this.state.password,
         };
         this.props.loginUser(userData, this.props.history);
     };
@@ -36,7 +36,7 @@ class LoginPage extends Component {
                                  name="email"
                                  type="email"
                                  label="Email"
-                                 //helperText={errors.email} // have this display problems noted in teh redux store via NOTE_LOGIN_PROBLEM
+                                 //helperText={errors.email} // have this display problems noted in the redux store via NOTE_LOGIN_PROBLEM
                                  //error={errors.email ? true : false} // have this display problems noted in teh redux store via NOTE_LOGIN_PROBLEM
                                  value={this.state.email}
                                  onChange={this.handleChange}
@@ -80,4 +80,4 @@ const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({loginUser}, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);
+export default connect(mapStateToProps, mapDispatchToProps)(LoginContainer);

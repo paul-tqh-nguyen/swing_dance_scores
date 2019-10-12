@@ -4,10 +4,9 @@ import {Provider} from 'react-redux';
 import axios from 'axios';
 import {store} from '../redux/store';
 import './App.scss';
-import HomePage from './HomePage';
-import LoginPage from './LoginPage';
-import SignUpPage from './SignUpPage';
 import NavigationBar from './NavigationBar';
+import DefaultPage from './pages/DefaultPage';
+import MyCompetitions from './pages/MyCompetitions';
 
 axios.defaults.baseURL = 'https://us-central1-swing-dance-scores.cloudfunctions.net/api';
 
@@ -24,9 +23,8 @@ export class App extends Component {
               <Provider store={store}>
                 <NavigationBar/>
                 <div className='center-frame-container'>
-                  <Route path='/' render={(props) => <HomePage {...props}/>} exact/>
-                  <Route path='/login' render={(props) => <LoginPage {...props}/>} exact/>
-                  <Route path='/signup' render={(props) => <SignUpPage {...props}/>} exact/>
+                  <Route path='/' render={(props) => <DefaultPage {...props}/>} exact/>
+                  <Route path='/MyCompetitions' render={(props) => <MyCompetitions {...props}/>} exact/>
                 </div>
               </Provider>
             </BrowserRouter>

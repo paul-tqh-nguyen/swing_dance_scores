@@ -6,6 +6,8 @@ import {
     NOTE_USER_DATA_GATHERING_PROBLEM,
     FORGET_USER_DATA_GATHERING_PROBLEMS,
     NOTE_CURRENT_USER_INFO,
+    NOTE_AUTHENTICATION_TRUE,
+    NOTE_AUTHENTICATION_FALSE,
 } from './types';
 import {createStore, applyMiddleware, compose} from 'redux';
 import thunk from 'redux-thunk';
@@ -17,6 +19,7 @@ const initialState = {
     loginErrors: [], // @todo do something with this ; make sure the previous errors are used or cleared
     userDataGatheringProblems: [], // @todo do something with this ; make sure the previous errors are used or cleared
     currentUserData: {}, // @todo do something with this
+    authenticated: false,
 };
 
 // @todo when this becomes big enough, abstract out these parts into helper reducers similar to what is done in this example:
@@ -61,6 +64,16 @@ function reducer(state=initialState, action) {
         return {
             ...state,
             currentUserData: action.userData,
+        };
+    case NOTE_AUTHENTICATION_TRUE:
+        return {
+            ...state,
+            authenticated: true,
+        };
+    case NOTE_AUTHENTICATION_FALSE:
+        return {
+            ...state,
+            authenticated: false,
         };
     default:
         if (!action.type.includes("@@")) {
