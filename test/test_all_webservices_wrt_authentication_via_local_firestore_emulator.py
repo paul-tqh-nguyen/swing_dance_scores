@@ -36,8 +36,8 @@ import time
 # Tests #
 #########
 
-class testAllWebServicesWrtAuthentication(unittest.TestCase):
-    def testAllWebServicesWrtAuthentication(self):
+class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.TestCase):
+    def testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(self):
         number_of_node_processes_before = get_current_number_of_node_processes()
         
         # Test firestore initilization

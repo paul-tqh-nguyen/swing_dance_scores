@@ -10,7 +10,7 @@ Owner : paul-tqh-nguyen
 
 Created : 09/02/2019
 
-File Name : test_all.py
+File Name : test_driver.py
 
 File Organization:
 * Test Imports
@@ -27,8 +27,8 @@ import signal
 import unittest
 from util.miscellaneous_utilities import *
 from .test_utilities import *
-from .test_all_webservices_end_to_end import testAllWebServicesEndToEnd
-from .test_all_webservices_wrt_authentication import testAllWebServicesWrtAuthentication
+from .test_all_webservices_end_to_end_via_local_firestore_emulator import testAllWebServicesEndToEndViaLocalFireStoreEmulator
+from .test_all_webservices_wrt_authentication_via_local_firestore_emulator import testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator
 from .test_db_has_few_test_user_accounts import testDBHasFewTestUserAccounts
 
 ###############
@@ -109,8 +109,8 @@ def run_all_tests():
     print()
     loader = unittest.TestLoader()
     tests = [
-        loader.loadTestsFromTestCase(testAllWebServicesEndToEnd),
-        loader.loadTestsFromTestCase(testAllWebServicesWrtAuthentication),
+        loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
+        loader.loadTestsFromTestCase(testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator),
         loader.loadTestsFromTestCase(testDBHasFewTestUserAccounts),
     ]
     suite = unittest.TestSuite(tests)

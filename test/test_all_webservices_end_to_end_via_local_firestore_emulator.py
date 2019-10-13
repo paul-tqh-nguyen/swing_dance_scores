@@ -36,8 +36,8 @@ import time
 # Tests #
 #########
 
-class testAllWebServicesEndToEnd(unittest.TestCase):
-    def testAllWebServicesEndToEnd(self):
+class testAllWebServicesEndToEndViaLocalFireStoreEmulator(unittest.TestCase):
+    def testAllWebServicesEndToEndViaLocalFireStoreEmulator(self):
         number_of_node_processes_before = get_current_number_of_node_processes()
         
         # Test firestore initilization
