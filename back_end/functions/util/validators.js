@@ -42,8 +42,22 @@ const loginValidationErrors = (user) => {
     return errors;
 };
 
+const updateUserDataValidationErrors = (updateUserDataRequestBody) => {
+    let errors = {};
+    // @todo add a test for this validation
+    let newEmail = updateUserDataRequestBody.newEmail;
+    let password = updateUserDataRequestBody.password;
+    if (newEmail) {
+        if (!password) {
+            errors.newEmail = "Cannot update email without authentication via password.";
+        } else if (isEmptyString(password)) {
+            errors.password = "Password must not be empty.";
+        }
+    }
+    return errors;
+};
 
-const reduceUserDetails = (data) => {
+const reduceUserDetails = (data) => { // @todo do we need this?
     let userDetails = {};
     if (!isEmptyString(data.organizationName.trim())) {
         userDetails.organizationName = data.organizationName;
@@ -52,4 +66,4 @@ const reduceUserDetails = (data) => {
     return userDetails;
 };
 
-module.exports = { signupValidationErrors, loginValidationErrors, reduceUserDetails };
+module.exports = { signupValidationErrors, loginValidationErrors, reduceUserDetails, updateUserDataValidationErrors };

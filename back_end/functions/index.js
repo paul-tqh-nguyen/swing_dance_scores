@@ -19,13 +19,14 @@ app.delete('/competition/:competitionId', FBAuth, deleteCompetition);
 // @todo modify a competition
 
 // Users
-const { signup, login, uploadImage, addUserDetails, getUserData } = require('./handlers/users');
+const { signup, login, uploadImage, addUserDetails, getUserData, updateUserData } = require('./handlers/users');
 let token, userId;
 app.post('/signup', signup);
 app.post('/login', login);
 app.post('/users/image', FBAuth, uploadImage);
 app.post('/users/addUserDetails', FBAuth, addUserDetails);
 app.get('/users/getUserDetails', FBAuth, getUserData);
+app.post('/users/updateUserDetails', FBAuth, updateUserData);
 
 const functions = require('firebase-functions');
 exports.api = functions.https.onRequest(app);

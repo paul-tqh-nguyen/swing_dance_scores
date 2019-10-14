@@ -2,7 +2,7 @@
 const { firebaseConfig } = require('../util/config.js');
 const firebase = require('firebase');
 const { db, admin } = require("../util/admin");
-const { signupValidationErrors, loginValidationErrors, reduceUserDetails } = require("../util/validators");
+const { signupValidationErrors, loginValidationErrors, reduceUserDetails, updateUserDataValidationErrors } = require("../util/validators");
 
 const noImageFileName = "no_image.png";
 
@@ -18,6 +18,7 @@ exports.signup = (request, response) => {
         return response.status(400).json(errors);
     }
     let userId, token;
+    let refreshToken;
     db.doc(`/users/${newUser.handle}`).get()
         .then(doc => {
             if (doc.exists) {
@@ -28,6 +29,7 @@ exports.signup = (request, response) => {
         })
         .then(data => {
             userId = data.user.uid;
+            refreshToken = data.user.refreshToken;
             return data.user.getIdToken();
         })
         .then(retrievedToken => {
@@ -42,7 +44,7 @@ exports.signup = (request, response) => {
             return db.doc(`/users/${newUser.handle}`).set(userCredentials);
         })
         .then(() => {
-            return response.status(201).json({token: token});
+            return response.status(201).json({token: token, refreshToken: refreshToken});
         })
         .catch(err => {
             console.error(err);
@@ -101,7 +103,6 @@ exports.uploadImage = (request, response) => {
             return response.status(400).json({ error: 'Only JPEG images can be uploaded.' });
         }
         imageFileName = `${Date.now()}_${Math.floor(Math.random()*100000000000000)}.${imageExtension}`;
-        console.log(`${imageFileName}`);
         const filepath = path.join(os.tmpdir(), imageFileName);
         imageToBeUploaded = {
             filepath: filepath,
@@ -128,7 +129,7 @@ exports.uploadImage = (request, response) => {
                 return response.json({ message: "Image uploaded successfully.", imageUrl: imageUrl});
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error);
                 return response.status(500).json({error: error.code});
             });
     });
@@ -148,20 +149,63 @@ exports.addUserDetails = (request, response) => {
         });
 };
 
+exports.updateUserData = (request, response) => {
+    let errors = updateUserDataValidationErrors(request.body);
+    if (Object.keys(errors).length>0) {
+        return response.status(400).json(errors);
+    }
+    let newEmail = request.body.newEmail;
+    let password = request.body.password;
+    if (newEmail && password) {
+        let oldEmail, docId;
+        db.collection("users")
+            .where("handle", "==", request.user.handle)
+            .limit(1)
+            .get()
+            .then(querySnapshot => {
+                let docs = [];
+                querySnapshot.forEach(doc => docs.push(doc));
+                if (docs.length !== 1) {
+                    throw new Error(`Could not find user for handle ${request.user.handle}`);
+                }
+                let doc = docs[0];
+                docId = doc.id;
+                let docData = doc.data();
+                oldEmail = docData.email;
+                return firebase.auth().signInWithEmailAndPassword(oldEmail, password);
+            })
+            .then(() => {
+                return firebase.auth().currentUser.updateEmail(newEmail);
+            })
+            .then(() => {
+                return db.collection("users").doc(docId).update({
+                    email: newEmail,
+                });
+            })
+            .then(() => {
+                return response.status(200).json({message: "Update completed successfully."});
+            })
+            .catch(err => {
+                console.error(err);
+                return response.status(500).json({ error: err.code });
+            });
+    }
+    return null;
+};
+
 exports.getUserData = (request, response) => {
     db.collection("users")
         .where("handle", "==", request.user.handle)
         .limit(1)
         .get()
         .then(querySnapshot => {
-            console.log(11);
             let docs = [];
             querySnapshot.forEach(doc => docs.push(doc));
             if (docs.length !== 1) {
-                return response.status(500).json({ error: `Could not find user for handle ${request.user.handle}`});
+                throw new Error(`Could not find user for handle ${request.user.handle}`);
             }
             let userData = docs[0].data();
-            return response.json(userData);
+            return response.status(200).json(userData);
         })
         .catch(err => {
             console.error(err);
