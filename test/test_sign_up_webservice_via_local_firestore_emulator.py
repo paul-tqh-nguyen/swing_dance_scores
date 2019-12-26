@@ -66,10 +66,9 @@ class testSignUpWebserviceViaLocalFirestoreEmulator(unittest.TestCase):
         signup_headers = {'Content-Type': 'application/json'}
         signup_response = requests.post(signup_uri, data=json.dumps(signup_body), headers=signup_headers)
         signup_response_status_code = signup_response.status_code
-        self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}. \n\nBelow is the STDOUT of the local firestore process: {firestore_stdout}".format(uri=signup_uri, status_code=signup_response_status_code, firestore_stdout=extract_lines_from_subprocess(firestore_emulation_process)))
+        self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}. \n\nBelow is the STDOUT of the local firestore process:\n\n{firestore_stdout}".format(uri=signup_uri, status_code=signup_response_status_code, firestore_stdout=extract_stdout_from_subprocess(firestore_emulation_process)))
         firestore_emulation_process
         
-        debug_log(signup_body)
         signup_response_json_string = signup_response.content
         signup_response_dict = json.loads(signup_response_json_string)
         self.assertTrue('token' in signup_response_dict, msg="We got an unexpected result from the endpoint at {uri} as we got {result}".format(uri=signup_uri, result=signup_response_dict))

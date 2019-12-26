@@ -28,6 +28,7 @@ from contextlib import contextmanager
 import warnings
 import sys
 import logging
+import socket
 from typing import List
 
 ###################
@@ -82,16 +83,21 @@ def debug_log(input_to_log='') -> None:
     log.debug('\n'.join(lines_with_machine_name_appended)+'\n')
     return None
 
-def extract_lines_from_subprocess(subprocess, time_limit: int=1) -> List[str]:
+def extract_stdout_from_subprocess(subprocess, time_limit: int=5) -> List[str]:
     """subprocess is of the type returned by subprocess.Popen"""
     lines = []
-    with timeout(time_limit, lambda: warnings.warn("Time limit exceeded while attempting to extract all stdout lines from {subprocess} at {timestamp}.".format(subprocess=subprocess, timestamp=current_timestamp_string))):
+    time_limit_reached = False
+    def note_time_limit_reached():
+        time_limit_reached = True
+        return None
+    with timeout(time_limit, note_time_limit_reached):
         while True:
             line = subprocess.stdout.readline()
             if not line:
                 break
             lines.append(line)
-    return lines
+    stdout_text = '\n'.join(lines)
+    return stdout_text, time_limit_reached
 
 ###############
 # Main Runner #

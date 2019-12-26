@@ -11,6 +11,7 @@ exports.signup = (request, response) => {
         email: request.body.email,
         password: request.body.password,
         confirmPassword: request.body.confirmPassword,
+        handle: request.body.handle,
     };
     let errors = signupValidationErrors(newUser);
     if (Object.keys(errors).length>0) {
@@ -20,8 +21,8 @@ exports.signup = (request, response) => {
     let refreshToken;
     db.doc(`/users/${newUser.handle}`).get()
         .then(doc => {
-            if (!doc.exists) {
-                let error = new Error("This handle is already taken.");
+            if (doc.exists) {
+                let error = new Error(`The handle ${newUser.handle} is already taken.`);
                 throw error;
             } else {
                 return firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password);
