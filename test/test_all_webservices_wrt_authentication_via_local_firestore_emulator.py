@@ -78,9 +78,9 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
         all_competitions = json.loads(all_competitions_json_string)
         self.assertTrue(isinstance(all_competitions,list), msg="The response from the endpoint at {get_all_competitions_uri} didn't return JSON content of the correct type (we expected a list). We got the following: \n\n{all_competitions_json_string}\n\n".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions_json_string=all_competitions_json_string))
         self.assertEqual(len(all_competitions), 0, msg="The response from the endpoint at {get_all_competitions_uri} didn't return an empty list. We expect there to be zero competitions so far as we attempted to created one competition with invalid credentials and since the firestore emulator was just initialized.".format(get_all_competitions_uri=get_all_competitions_uri))
-        
+
         valid_handle, valid_email, valid_password = generate_new_test_email_and_password_and_user_handle()
-        
+
         # Test signup endpoint (in order to access valid authentication credentials)
         signup_uri = urllib.parse.urljoin(api_base_uri_string, "signup")
         signup_body = {
@@ -92,7 +92,7 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
         signup_headers = {'Content-Type': 'application/json'}
         signup_response = requests.post(signup_uri, data=json.dumps(signup_body), headers=signup_headers)
         signup_response_status_code = signup_response.status_code
-        self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=get_all_competitions_uri, status_code=signup_response_status_code))
+       self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=get_all_competitions_uri, status_code=signup_response_status_code))
         signup_response_json_string = signup_response.content
         signup_response_dict = json.loads(signup_response_json_string)
         self.assertTrue('token' in signup_response_dict, msg="We got an unexpected result from the endpoint at {uri} as we got {result}".format(uri=signup_uri, result=signup_response_dict))

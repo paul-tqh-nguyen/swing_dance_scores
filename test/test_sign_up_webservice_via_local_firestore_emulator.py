@@ -36,7 +36,7 @@ import json
 #########
 
 class testSignUpWebserviceViaLocalFirestoreEmulator(unittest.TestCase):
-    def testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(self):
+    def testSignUpWebserviceViaLocalFirestoreEmulator(self):
         number_of_node_processes_before = get_current_number_of_node_processes()
         
         # Test firestore initilization
@@ -52,9 +52,6 @@ class testSignUpWebserviceViaLocalFirestoreEmulator(unittest.TestCase):
         self.assertTrue(isinstance(api_base_uri_string,str), msg="Could not find the API base URI. The output was: \n{output}".format(output=firestore_emulation_process_text_output_total_text))
         
         number_of_node_processes_during = get_current_number_of_node_processes()
-        bad_credentials_handle = random_string()
-        bad_credentials_token  = random_string()
-        get_all_competitions_uri = urllib.parse.urljoin(api_base_uri_string, "competitions")
 
         test_handle, test_email, test_password = generate_new_test_email_and_password_and_user_handle()
         
@@ -64,12 +61,15 @@ class testSignUpWebserviceViaLocalFirestoreEmulator(unittest.TestCase):
             "email": test_email,
             "password": test_password,
             "confirmPassword": test_password,
-            "handle": test_handle
+            "handle": test_handle,
         }
         signup_headers = {'Content-Type': 'application/json'}
         signup_response = requests.post(signup_uri, data=json.dumps(signup_body), headers=signup_headers)
         signup_response_status_code = signup_response.status_code
-        self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=get_all_competitions_uri, status_code=signup_response_status_code))
+        self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}. \n\nBelow is the STDOUT of the local firestore process: {firestore_stdout}".format(uri=signup_uri, status_code=signup_response_status_code, firestore_stdout=extract_lines_from_subprocess(firestore_emulation_process)))
+        firestore_emulation_process
+        
+        debug_log(signup_body)
         signup_response_json_string = signup_response.content
         signup_response_dict = json.loads(signup_response_json_string)
         self.assertTrue('token' in signup_response_dict, msg="We got an unexpected result from the endpoint at {uri} as we got {result}".format(uri=signup_uri, result=signup_response_dict))

@@ -21,21 +21,24 @@ File Organization:
 # Imports #
 ###########
 
-import unittest
 import subprocess
-import os
 import signal
 import random
 from contextlib import contextmanager
+import warnings
+import sys
+import logging
+from typing import List
 
 ###################
 # Misc. Utilities #
 ###################
 
 @contextmanager
-def timeout(time, functionToExecuteOnTimeout=None):
+def timeout(time: int, functionToExecuteOnTimeout=None):
     '''NB: This cannot be nested.'''
     signal.signal(signal.SIGALRM, _raise_timeout)
+    assert isinstance(time, int), "timeout not currently supported for non-integer time limits."
     signal.alarm(time)
     try:
         yield
@@ -63,6 +66,32 @@ def remove_duplicates(items: list) -> list:
 
 def noop(*args, **kws):
     return None
+
+def current_timestamp_string() -> str:
+    return time.strftime("%Y_%m_%d_%H_%M_%S")
+
+DEBUGGING_LOGGER_NAME = "debuggingLogger"
+logging.basicConfig(stream=sys.stderr)
+logging.getLogger(DEBUGGING_LOGGER_NAME).setLevel(logging.DEBUG)
+
+def debug_log(input_to_log='') -> None:
+    log = logging.getLogger(DEBUGGING_LOGGER_NAME)
+    dwimmed_input_to_log = str(input_to_log)
+    lines = dwimmed_input_to_log.split("\n")
+    lines_with_machine_name_appended = map(lambda line: socket.gethostname()+': '+line, lines)
+    log.debug('\n'.join(lines_with_machine_name_appended)+'\n')
+    return None
+
+def extract_lines_from_subprocess(subprocess, time_limit: int=1) -> List[str]:
+    """subprocess is of the type returned by subprocess.Popen"""
+    lines = []
+    with timeout(time_limit, lambda: warnings.warn("Time limit exceeded while attempting to extract all stdout lines from {subprocess} at {timestamp}.".format(subprocess=subprocess, timestamp=current_timestamp_string))):
+        while True:
+            line = subprocess.stdout.readline()
+            if not line:
+                break
+            lines.append(line)
+    return lines
 
 ###############
 # Main Runner #
