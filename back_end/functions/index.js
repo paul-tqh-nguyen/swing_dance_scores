@@ -4,29 +4,29 @@ const { db } = require("./util/admin");
 const { firebaseConfig } = require('./util/config.js');
 const firebase = require('firebase');
 firebase.initializeApp(firebaseConfig);
-
 const cors = require('cors');
 app.use(cors());
+const { FBAuthenticate, possiblyFBAuthenticate } = require('./util/fbAuth');
 
 // Competitions
-const { getAllCompetitions, postOneCompetition, findCompetition, deleteCompetition } = require('./handlers/competitions');
-const { FBAuth } = require('./util/fbAuth');
+const { createCompetition, findCompetitionById, findCompetitionsModifiableByUser, findCompetitionsVisibleToUser, editCompetition, deleteCompetition, scoreCompetition } = require('./handlers/competitions');
 // @todo refactor this to make sure all the routes make sense to us (the developers)
-app.get('/competitions', getAllCompetitions);
-app.post('/createCompetition', FBAuth, postOneCompetition);
-app.get('/competition/:competitionId', findCompetition); // e.g. http://localhost:5000/swing-dance-scores/us-central1/api/competition/3QWUwBiPLFTwq4rlc1oo
-app.delete('/competition/:competitionId', FBAuth, deleteCompetition); 
-// @todo modify a competition
-
+app.post('/createCompetition', FBAuthenticate, createCompetition);
+app.get('/competition/:competitionId', possiblyFBAuthenticate, findCompetitionById); // e.g. http://localhost:5000/swing-dance-scores/us-central1/api/competition/3QWUwBiPLFTwq4rlc1oo
+app.put('/competition/:competitionId', FBAuthenticate, editCompetition);
+app.delete('/competition/:competitionId', FBAuthenticate, deleteCompetition); 
+app.get('/modifiableCompetitions', FBAuthenticate, findCompetitionsModifiableByUser);
+app.get('/visibleCompetitions', possiblyFBAuthenticate, findCompetitionsVisibleToUser);
+app.put('/scoreCompetition/:competitionId', FBAuthenticate, scoreCompetition);
 // Users
 const { signup, login, uploadImage, addUserDetails, getUserData, updateUserData } = require('./handlers/users');
 let token, userId;
 app.post('/signup', signup);
 app.post('/login', login);
-app.post('/users/image', FBAuth, uploadImage);
-app.post('/users/addUserDetails', FBAuth, addUserDetails);
-app.get('/users/getUserDetails', FBAuth, getUserData);
-app.post('/users/updateUserDetails', FBAuth, updateUserData);
+app.post('/users/image', FBAuthenticate, uploadImage);
+app.post('/users/addUserDetails', FBAuthenticate, addUserDetails);
+app.get('/users/getUserDetails', FBAuthenticate, getUserData);
+app.post('/users/updateUserDetails', FBAuthenticate, updateUserData);
 
 const functions = require('firebase-functions');
 exports.api = functions.https.onRequest(app);

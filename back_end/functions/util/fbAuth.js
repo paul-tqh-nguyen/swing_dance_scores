@@ -1,7 +1,7 @@
 
 const { admin, db } = require("../util/admin");
 
-const FBAuth = (request, response, next) => {
+const FBAuthenticate = (request, response, next) => {
     let idToken;
     if (request.headers.authorization && request.headers.authorization.startsWith('Bearer ')) {
         idToken = request.headers.authorization.split('Bearer ')[1];
@@ -28,4 +28,28 @@ const FBAuth = (request, response, next) => {
     return null;
 };
 
-module.exports = { FBAuth };
+const possiblyFBAuthenticate = (request, response, next) => {
+    let idToken;
+    if (request.headers.authorization && request.headers.authorization.startsWith('Bearer ')) {
+        idToken = request.headers.authorization.split('Bearer ')[1];
+        admin.auth().verifyIdToken(idToken)
+            .then(decodedToken => {
+                request.user = decodedToken;
+                return db.collection("users")
+                    .where("userId","==",request.user.uid)
+                    .limit(1)
+                    .get();
+            })
+            .then(data => {
+                request.user.handle = data.docs[0].data().handle;
+                return next();
+            })
+            .catch(err => {
+                console.log(err.message ? err.message : err.code);
+                return next();
+            });
+    }
+    return null;
+};
+
+module.exports = { FBAuthenticate, possiblyFBAuthenticate };

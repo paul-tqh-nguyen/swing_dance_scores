@@ -2,13 +2,13 @@
 
 """
 
-This module contains unit test cases intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ that require authentication actually require authentication.
+This module contains unit test cases intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ that require authentication actually require authentication. The authentication is handled by our production DB, but storage is tested by a local firestore emulator.
 
 Owner : paul-tqh-nguyen
 
 Created : 09/02/2019
 
-File Name : test_all_webservices_wrt_authentication.py
+File Name : test_all_webservices_wrt_authentication_via_local_firestore_emulator.py
 
 File Organization:
 * Imports
@@ -192,4 +192,4 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
 ###############
 
 if __name__ == '__main__':
-    print("This module contains unit test cases intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ that require authentication actually require authentication.")
+    print("This module contains unit test cases intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ that require authentication actually require authentication. The authentication is handled by our production DB, but storage is tested by a local firestore emulator.")

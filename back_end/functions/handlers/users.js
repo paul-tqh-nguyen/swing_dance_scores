@@ -11,7 +11,6 @@ exports.signup = (request, response) => {
         email: request.body.email,
         password: request.body.password,
         confirmPassword: request.body.confirmPassword,
-        handle: request.body.handle,
     };
     let errors = signupValidationErrors(newUser);
     if (Object.keys(errors).length>0) {
@@ -21,8 +20,9 @@ exports.signup = (request, response) => {
     let refreshToken;
     db.doc(`/users/${newUser.handle}`).get()
         .then(doc => {
-            if (doc.exists) {
-                return response.status(400).json({ handle: "This handle is already taken."});
+            if (!doc.exists) {
+                let error = new Error("This handle is already taken.");
+                throw error;
             } else {
                 return firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password);
             }
@@ -40,6 +40,7 @@ exports.signup = (request, response) => {
                 createdAt: new Date().toISOString(),
                 userId: userId,
                 imageUrl: `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${noImageFileName}?alt=media`,
+                competitionsModifiableByUser: [],
             };
             return db.doc(`/users/${newUser.handle}`).set(userCredentials);
         })
@@ -48,7 +49,9 @@ exports.signup = (request, response) => {
         })
         .catch(err => {
             console.error(err);
-            if (err.code === "auth/email-already-in-use") {
+            if (err.message) {
+                return response.status(400).json({error: err.message});
+            } else if (err.code === "auth/email-already-in-use") {
                 return response.status(400).json({error: `The email address ${newUser.email} is already in use.`});
             } else {
                 return response.status(500).json({error: err.code});
@@ -158,17 +161,12 @@ exports.updateUserData = (request, response) => {
     let password = request.body.password;
     if (newEmail && password) {
         let oldEmail, docId;
-        db.collection("users")
-            .where("handle", "==", request.user.handle)
-            .limit(1)
-            .get()
-            .then(querySnapshot => {
-                let docs = [];
-                querySnapshot.forEach(doc => docs.push(doc));
-                if (docs.length !== 1) {
-                    throw new Error(`Could not find user for handle ${request.user.handle}`);
+        db.doc(`/users/${request.user.handle}`).get()
+            .then(doc => {
+                if (!doc.exists) {
+                    let error = new Error(`${request.user.handle} is not a valid handle.`);
+                    throw error;
                 }
-                let doc = docs[0];
                 docId = doc.id;
                 let docData = doc.data();
                 oldEmail = docData.email;
@@ -187,29 +185,30 @@ exports.updateUserData = (request, response) => {
             })
             .catch(err => {
                 console.error(err);
-                return response.status(500).json({ error: err.code });
+                return response.status(500).json({
+                    error: (err.message ? err.message : err.code)
+                });
             });
     }
     return null;
 };
 
 exports.getUserData = (request, response) => {
-    db.collection("users")
-        .where("handle", "==", request.user.handle)
-        .limit(1)
+    db.doc(`/users/${request.user.handle}`)
         .get()
-        .then(querySnapshot => {
-            let docs = [];
-            querySnapshot.forEach(doc => docs.push(doc));
-            if (docs.length !== 1) {
-                throw new Error(`Could not find user for handle ${request.user.handle}`);
+        .then(doc => {
+            if (!doc.exists) {
+                let error = new Error(`${request.user.handle} is not a valid handle.`);
+                throw error;
             }
-            let userData = docs[0].data();
+            let userData = doc.data();
             return response.status(200).json(userData);
         })
         .catch(err => {
             console.error(err);
-            return response.status(500).json({ error: err.code });
+            return response.status(500).json({
+                error: (err.message ? err.message : err.code)
+            });
         });
 };
 

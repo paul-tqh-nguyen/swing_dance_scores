@@ -2,13 +2,13 @@
 
 """
 
-This module contains an end-to-end integration test intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ work as intended.
+This module contains an end-to-end integration test intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ work as intended via a local firestore emulator.
 
 Owner : paul-tqh-nguyen
 
 Created : 09/02/2019
 
-File Name : test_all_webservices_end_to_end.py
+File Name : test_all_webservices_end_to_end_via_local_firestore_emulator.py
 
 File Organization:
 * Imports
@@ -183,4 +183,4 @@ class testAllWebServicesEndToEndViaLocalFireStoreEmulator(unittest.TestCase):
 ###############
 
 if __name__ == '__main__':
-    print("This module contains a end-to-end test intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ work as intended.")
+    print("This module contains an end-to-end integration test intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ work as intended via a local firestore emulator.")
