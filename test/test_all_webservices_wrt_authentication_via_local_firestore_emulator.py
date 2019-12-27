@@ -166,13 +166,13 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             }
             delete_competition_response = requests.delete(delete_competition_uri, headers=delete_competition_headers)
             # Test competition deletion failed
-            all_competitions_response = requests.get(url=get_all_competitions_uri)
+            all_competitions_response = requests.get(url=get_all_competitions_uri, headers=headers_to_view_the_singleton_private_competition)
             all_competitions_response_status_code = all_competitions_response.status_code
             self.assertEqual(200, all_competitions_response_status_code, msg="Failed to hit the endpoint at {uri} after deleting a competition as we got the status code of {status_code}".format(uri=get_all_competitions_uri, status_code=all_competitions_response_status_code))
             all_competitions_json_string = all_competitions_response.content
             all_competitions = json.loads(all_competitions_json_string)
             self.assertTrue(isinstance(all_competitions,list), msg="The response from the endpoint at {get_all_competitions_uri} didn't return JSON content of the correct type (we expected a list). We got the following: \n\n{all_competitions_json_string}\n\n".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions_json_string=all_competitions_json_string))
-            self.assertEqual(len(all_competitions), 1, msg="The response from the endpoint at {get_all_competitions_uri} didn't return a singleton list. We expect there to be exactly one competition since we created one with valid authentication and attempted to delete it with invalid authentication.".format(get_all_competitions_uri=get_all_competitions_uri))
+            self.assertEqual(len(all_competitions), 1, msg="The response from the endpoint at {get_all_competitions_uri} didn't return a singleton list. We expect there to be exactly one competition since we created one with valid authentication and attempted to delete it with invalid authentication. The contents returned are {competitions}.".format(get_all_competitions_uri=get_all_competitions_uri, competitions=all_competitions))
             
             organization_name = "organization_{num}".format(num=random_string())
             
