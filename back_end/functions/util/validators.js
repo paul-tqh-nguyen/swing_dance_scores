@@ -147,14 +147,18 @@ const competitionDataValidationErrors = (postBody, allFieldsAreRequired) => {
     let judgesInfoIsValid;
     if (allFieldsAreRequired || judges) {
         let errorsWRTJudges = [];
-        judges.forEach(judge => {
-            if (!isString(judge)) {
-                errorsWRTJudges.push(`${judge} is not a string and cannot be stored as the name of a judge.`);
+        if (!judges) {
+            errorsWRTJudges.push(`No judges specified`);
+        } else {
+            judges.forEach(judge => {
+                if (!isString(judge)) {
+                    errorsWRTJudges.push(`${judge} is not a string and cannot be stored as the name of a judge.`);
+                }
+            });
+            let uniqueJudges = Array.from(new Set(judges));
+            if (uniqueJudges.length !== judges.length) {
+                errorsWRTJudges.push(`${judges} contains duplicates.`);
             }
-        });
-        let uniqueJudges = Array.from(new Set(judges));
-        if (uniqueJudges.length !== judges.length) {
-            errorsWRTJudges.push(`${judges} contains duplicates.`);
         }
         if (errorsWRTJudges.length > 0) {
             errors.judges = errorsWRTJudges;

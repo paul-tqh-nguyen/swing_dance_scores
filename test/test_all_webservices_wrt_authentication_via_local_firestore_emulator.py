@@ -102,24 +102,23 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             valid_access_token = signup_response_dict['token']
             
             # Test createCompetition endpoint with valid authentication
-            create_competition_uri = urllib.parse.urljoin(api_base_uri_string, "createCompetition")
             competition_1_name = "competition_{random_string}".format(random_string=random_string())
             create_competition_body = {
-    	    "competitionName": competition_1_name,
-    	    "creatorHandle": valid_handle
+    	        "competitionName": competition_1_name,
+    	        "creatorHandle": valid_handle,
             }
             create_competition_headers = {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer {token}".format(token=valid_access_token)
+                "Authorization": "Bearer {token}".format(token=valid_access_token),
             }
             create_competition_response = requests.post(create_competition_uri, data=json.dumps(create_competition_body), headers=create_competition_headers)
             create_competition_response_status_code = create_competition_response.status_code
-            self.assertEqual(201, create_competition_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=create_competition_uri, status_code=create_competition_response_status_code))
+            self.assertEqual(201, create_competition_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}. The content of the response was: \n\n{content}".format(uri=create_competition_uri, status_code=create_competition_response_status_code, content=create_competition_response.content.decode('utf-8')))
             # Test that we have exactly 1 competition
             all_competitions_response = requests.get(url=get_all_competitions_uri)
             all_competitions_response_status_code = all_competitions_response.status_code
-            self.assertEqual(200, all_competitions_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=get_all_competitions_uri, status_code=all_competitions_response_status_code))
             all_competitions_json_string = all_competitions_response.content
+            self.assertEqual(200, all_competitions_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}. The content of the response was:\n\n{content}".format(uri=get_all_competitions_uri, status_code=all_competitions_response_status_code, content=all_competitions_json_string.decode('utf-8')))
             all_competitions = json.loads(all_competitions_json_string)
             self.assertTrue(isinstance(all_competitions,list), msg="The response from the endpoint at {get_all_competitions_uri} didn't return JSON content of the correct type (we expected a list). We got the following: \n\n{all_competitions_json_string}\n\n".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions_json_string=all_competitions_json_string))
             self.assertEqual(len(all_competitions), 1, msg="The response from the endpoint at {get_all_competitions_uri} didn't return a singleton list. We expect there to be only one competition so far as we only created one competition since the firestore emulator was just initialized.".format(get_all_competitions_uri=get_all_competitions_uri))
