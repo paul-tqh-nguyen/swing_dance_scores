@@ -142,12 +142,12 @@ const publicCompetitionInfos = () => {
 
 exports.findCompetitionsVisibleToUser = (request, response) => {
     let handle = ("user" in request && "handle" in request.user) ? request.user.handle : null;
-    let modifiableCompetitionInfoPromises = handle ? modifiableCompetitionInfosForUserWithHandle(handle) : [];
+    let modifiableCompetitionInfosPromise = handle ? modifiableCompetitionInfosForUserWithHandle(handle) : Promise.all([]);
     let publicCompetitionInfosPromise = publicCompetitionInfos();
-    return Promise.all([publicCompetitionInfosPromise, ...modifiableCompetitionInfoPromises])
+    return Promise.all([publicCompetitionInfosPromise, modifiableCompetitionInfosPromise])
         .then(publicCompetitionInfosAndModifiableCompetitionInfos => {
             let publicCompetitionInfos, modifiableCompetitionInfos; 
-            [ publicCompetitionInfos, ...modifiableCompetitionInfos] = publicCompetitionInfosAndModifiableCompetitionInfos;
+            [ publicCompetitionInfos, modifiableCompetitionInfos] = publicCompetitionInfosAndModifiableCompetitionInfos;
             let visibleCompetitionInfos = publicCompetitionInfos.concat(modifiableCompetitionInfos);
             return response.status(200).json(visibleCompetitionInfos);
         })

@@ -41,7 +41,7 @@ exports.signup = (request, response) => {
                 createdAt: new Date().toISOString(),
                 userId: userId,
                 imageUrl: `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${noImageFileName}?alt=media`,
-                competitionsModifiableByUser: [],
+                modifiableCompetitionIds: [],
             };
             return db.doc(`/users/${newUser.handle}`).set(userCredentials);
         })

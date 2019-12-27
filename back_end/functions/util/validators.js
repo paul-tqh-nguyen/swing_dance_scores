@@ -68,7 +68,7 @@ const updateUserDataValidationErrors = (updateUserDataRequestBody) => {
 const createCompetitionValidationComplaintsWRTCompetitorInfo = (competitorInfo, judges, judgesInfoIsValid) => {
     let competitorInfoComplaints = [];
     if (!Array.isArray(competitorInfo)) {
-        competitorInfoComplaints.push('competitorInfo must be specificed as a list of JSON objects with the form {"name": <string> , "competitorNumber": <integer>, "scores": [{"judge": <string>, "judgeScore": <integer>}, ...]}');
+        competitorInfoComplaints.push('competitorInfo must be specificed as a (possibly empty) list of JSON objects with the form {"name": <string> , "competitorNumber": <integer>, "scores": [{"judge": <string>, "judgeScore": <integer>}, ...]}');
     } else {
         competitorInfo.forEach(competitorInfoDatum => {
             if (!competitorInfoDatum.name) {

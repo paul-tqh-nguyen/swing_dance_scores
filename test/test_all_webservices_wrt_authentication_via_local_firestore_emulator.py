@@ -79,7 +79,7 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             self.assertTrue(len(all_competitions_json_string)!=0, msg="The response from the endpoint at {get_all_competitions_uri} returned an empty JSON string.".format(get_all_competitions_uri=get_all_competitions_uri))
             all_competitions = json.loads(all_competitions_json_string)
             self.assertTrue(isinstance(all_competitions,list), msg="The response from the endpoint at {get_all_competitions_uri} didn't return JSON content of the correct type (we expected a list). We got the following: \n\n{all_competitions_json_string}\n\n".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions_json_string=all_competitions_json_string))
-            self.assertEqual(len(all_competitions), 0, msg="The response from the endpoint at {get_all_competitions_uri} didn't return an empty list. We expect there to be zero competitions so far as we attempted to created one competition with invalid credentials and since the firestore emulator was just initialized.".format(get_all_competitions_uri=get_all_competitions_uri))
+            self.assertEqual(len(all_competitions), 0, msg="The response from the endpoint at {get_all_competitions_uri} didn't return an empty list. We expect there to be zero competitions so far as we attempted to created one competition with invalid credentials and since the firestore emulator was just initialized. The contents of the response is {all_competitions}.".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions=all_competitions))
     
             valid_handle, valid_email, valid_password = generate_new_test_email_and_password_and_user_handle()
     
@@ -106,6 +106,26 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             create_competition_body = {
     	        "competitionName": competition_1_name,
     	        "creatorHandle": valid_handle,
+                "category": "finals",
+                "judges": ["Alice", "Bob", "Cartman",],
+                "usersWithModificationPrivileges":[valid_handle],
+                "privacy": "private",
+                "competitorInfo": [],
+                # @todo write a test using this
+                # "competitorInfo": [
+                #     {"name": "Jack", "competitorNumber": "111", "scores": [
+                #         {"judge": "Alice", "judgeScore": 1},
+                #         {"judge": "Bob", "judgeScore": 1},
+                #         {"judge": "Cartman", "judgeScore": 1}]},
+                #     {"name": "Pig", "competitorNumber": "222", "scores": [
+                #         {"judge": "Alice", "judgeScore": 2},
+                #         {"judge": "Bob", "judgeScore": 2},
+                #         {"judge": "Cartman", "judgeScore": 2}]},
+                #     {"name": "Jill", "competitorNumber": "222", "scores": [
+                #         {"judge": "Alice", "judgeScore": 3},
+                #         {"judge": "Bob", "judgeScore": 3},
+                #         {"judge": "Cartman", "judgeScore": 3}]},
+                # ],
             }
             create_competition_headers = {
                 "Content-Type": "application/json",
@@ -114,8 +134,18 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             create_competition_response = requests.post(create_competition_uri, data=json.dumps(create_competition_body), headers=create_competition_headers)
             create_competition_response_status_code = create_competition_response.status_code
             self.assertEqual(201, create_competition_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}. The content of the response was: \n\n{content}".format(uri=create_competition_uri, status_code=create_competition_response_status_code, content=create_competition_response.content.decode('utf-8')))
-            # Test that we have exactly 1 competition
+            # Test that we have 0 public competitions
             all_competitions_response = requests.get(url=get_all_competitions_uri)
+            all_competitions_response_status_code = all_competitions_response.status_code
+            self.assertEqual(200, all_competitions_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}.".format(uri=get_all_competitions_uri, status_code=all_competitions_response_status_code))
+            all_competitions_json_string = all_competitions_response.content
+            self.assertTrue(len(all_competitions_json_string)!=0, msg="The response from the endpoint at {get_all_competitions_uri} returned an empty JSON string.".format(get_all_competitions_uri=get_all_competitions_uri))
+            all_competitions = json.loads(all_competitions_json_string)
+            self.assertTrue(isinstance(all_competitions,list), msg="The response from the endpoint at {get_all_competitions_uri} didn't return JSON content of the correct type (we expected a list). We got the following: \n\n{all_competitions_json_string}\n\n".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions_json_string=all_competitions_json_string))
+            self.assertEqual(len(all_competitions), 0, msg="The response from the endpoint at {get_all_competitions_uri} didn't return an empty list. We expect there to be zero competitions so far as we created one private competition and hit this endpoint without any credentials.".format(get_all_competitions_uri=get_all_competitions_uri))
+            # Test that we have exactly 1 competition
+            headers_to_view_the_singleton_private_competition = create_competition_headers
+            all_competitions_response = requests.get(url=get_all_competitions_uri, headers=headers_to_view_the_singleton_private_competition)
             all_competitions_response_status_code = all_competitions_response.status_code
             all_competitions_json_string = all_competitions_response.content
             self.assertEqual(200, all_competitions_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}. The content of the response was:\n\n{content}".format(uri=get_all_competitions_uri, status_code=all_competitions_response_status_code, content=all_competitions_json_string.decode('utf-8')))
@@ -123,9 +153,8 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             self.assertTrue(isinstance(all_competitions,list), msg="The response from the endpoint at {get_all_competitions_uri} didn't return JSON content of the correct type (we expected a list). We got the following: \n\n{all_competitions_json_string}\n\n".format(get_all_competitions_uri=get_all_competitions_uri, all_competitions_json_string=all_competitions_json_string))
             self.assertEqual(len(all_competitions), 1, msg="The response from the endpoint at {get_all_competitions_uri} didn't return a singleton list. We expect there to be only one competition so far as we only created one competition since the firestore emulator was just initialized.".format(get_all_competitions_uri=get_all_competitions_uri))
             only_competition = all_competitions[0]
-            self.assertEqual(only_competition["competitionName"], competition_1_name,
-                             msg="Unexpected competitionName value for the first competition created in {result}.".format(result=only_competition))
-            self.assertEqual(only_competition["creatorHandle"], valid_handle, msg="Unexpected creatorHandle value for the first competition created in {result}.".format(result=only_competition))
+            self.assertEqual(only_competition["competitionName"], competition_1_name, msg="Unexpected competitionName value for the first competition created in {result}.".format(result=only_competition))
+            self.assertTrue(valid_handle in only_competition["usersWithModificationPrivileges"], msg="Unexpected creatorHandle value for the first competition created in {result}.".format(result=only_competition))
             
             # Test competition delete endpoint fails for bad authentication
             competition_to_delete = only_competition
