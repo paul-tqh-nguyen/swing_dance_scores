@@ -22,7 +22,7 @@ const FBAuthenticate = (request, response, next) => {
             return next();
         })
         .catch(err => {
-            console.log("Error while evrifying token ", err);
+            console.error("Error while verifying token ", err);
             return response.status(403).json(err);
         });
     return null;
@@ -45,9 +45,11 @@ const possiblyFBAuthenticate = (request, response, next) => {
                 return next();
             })
             .catch(err => {
-                console.log(err.message ? err.message : err.code);
+                console.error(err.message ? err.message : err.code);
                 return next();
             });
+    } else {
+        next();
     }
     return null;
 };

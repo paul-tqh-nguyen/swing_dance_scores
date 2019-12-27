@@ -57,7 +57,6 @@ exports.findCompetitionById = (request, response) => {
             let competitionData = doc.data();
             if (competitionData.privacy !== "public") {
                 if (!request.user || !request.user.handle) {
-                    console.error(`request.user.handle ${request.user.handle}`);
                     throw new Error(`Authentication required to view competition ${request.params.competitionId}.`);
                 } else if (!competitionData.usersWithModificationPrivileges.includes(request.user.handle)) {
                     throw new Error(`${request.user.handle} cannot modify competition ${request.params.competitionId}.`);
@@ -116,7 +115,8 @@ const modifiableCompetitionInfosForUserWithHandle = (handle) => {
 };
 
 exports.findCompetitionsModifiableByUser = (request, response) => {
-    return modifiableCompetitionInfosForUserWithHandle(request.user.handle)
+    let handle = "user" in request && "handle" in request.user ? request.user.handle : null;
+    return modifiableCompetitionInfosForUserWithHandle(handle)
         .then(competitionInfos => {
             return response.status(200).json(competitionInfos);
         })
@@ -126,8 +126,7 @@ exports.findCompetitionsModifiableByUser = (request, response) => {
         });
 };
 
-const visibleCompetitionInfosForUserWithHandle = (handle) => {
-    let modifiableCompetitionInfosPromise = modifiableCompetitionInfosForUserWithHandle(handle);
+const publicCompetitionInfos = () => {
     let publicCompetitionInfosPromise = db.collection('unscoredCompetitions')
         .where("privacy","==","public")
         .get()
@@ -138,13 +137,18 @@ const visibleCompetitionInfosForUserWithHandle = (handle) => {
             });
             return publicCompetitionInfos;
         });
-    let visibleCompetitionInfoPromises = [modifiableCompetitionInfosPromise, publicCompetitionInfosPromise];
-    return Promise.all(visibleCompetitionInfoPromises);
+    return publicCompetitionInfosPromise;
 };
 
 exports.findCompetitionsVisibleToUser = (request, response) => {
-    return visibleCompetitionInfosForUserWithHandle(request.user.handle)
-        .then(visibleCompetitionInfos => {
+    let handle = ("user" in request && "handle" in request.user) ? request.user.handle : null;
+    let modifiableCompetitionInfoPromises = handle ? modifiableCompetitionInfosForUserWithHandle(handle) : [];
+    let publicCompetitionInfosPromise = publicCompetitionInfos();
+    return Promise.all([publicCompetitionInfosPromise, ...modifiableCompetitionInfoPromises])
+        .then(publicCompetitionInfosAndModifiableCompetitionInfos => {
+            let publicCompetitionInfos, modifiableCompetitionInfos; 
+            [ publicCompetitionInfos, ...modifiableCompetitionInfos] = publicCompetitionInfosAndModifiableCompetitionInfos;
+            let visibleCompetitionInfos = publicCompetitionInfos.concat(modifiableCompetitionInfos);
             return response.status(200).json(visibleCompetitionInfos);
         })
         .catch(error => {

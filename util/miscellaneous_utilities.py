@@ -83,21 +83,18 @@ def debug_log(input_to_log='') -> None:
     log.debug('\n'.join(lines_with_machine_name_appended)+'\n')
     return None
 
-def extract_stdout_from_subprocess(subprocess, time_limit: int=5) -> List[str]:
+def extract_stdout_from_subprocess(subprocess, time_limit: int=3) -> List[str]:
     """subprocess is of the type returned by subprocess.Popen"""
     lines = []
-    time_limit_reached = False
-    def note_time_limit_reached():
-        time_limit_reached = True
-        return None
-    with timeout(time_limit, note_time_limit_reached):
+    with timeout(time_limit, lambda: warnings.warn("Time limit of {time_limit} seconds reached when trying to extract the STDOUT from {subprocess}.".format(time_limit=time_limit, subprocess=subprocess))):
         while True:
             line = subprocess.stdout.readline()
             if not line:
                 break
             lines.append(line)
-    stdout_text = '\n'.join(lines)
-    return stdout_text, time_limit_reached
+    
+    stdout_text = ''.join(lines)
+    return stdout_text
 
 ###############
 # Main Runner #

@@ -50,7 +50,7 @@ exports.createNotificationOnCompetitionDelete = functions
                 return null;
             })
             .catch(err => {
-                console.log(err);
+                console.error(err);
                 return null;
             });
     });
