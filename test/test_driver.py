@@ -111,11 +111,11 @@ def run_all_tests():
     print()
     loader = unittest.TestLoader()
     tests = [
-        # loader.loadTestsFromTestCase(testSignUpWebserviceViaLocalFirestoreEmulator),
-        # loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
+        loader.loadTestsFromTestCase(testSignUpWebserviceViaLocalFirestoreEmulator),
+        loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
         loader.loadTestsFromTestCase(testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator),
-        # loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaDeployedApp),
-        # loader.loadTestsFromTestCase(testDBHasFewTestUserAccounts),
+        loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaDeployedApp),
+        loader.loadTestsFromTestCase(testDBHasFewTestUserAccounts),
     ]
     suite = unittest.TestSuite(tests)
     runner = unittest.TextTestRunner(verbosity=2)

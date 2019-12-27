@@ -17,6 +17,7 @@ exports.createCompetition = (request, response) => {
         competitorInfo: request.body.competitorInfo,
         usersWithModificationPrivileges: request.body.usersWithModificationPrivileges,
         privacy: request.body.privacy,
+        creatorHandle: request.user.handle, 
     };
     let newCompetitionId;
     return db.collection('unscoredCompetitions')

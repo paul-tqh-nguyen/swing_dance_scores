@@ -62,8 +62,14 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             create_competition_uri = urllib.parse.urljoin(api_base_uri_string, "createCompetition")
             competition_1_name = "competition_{random_string}".format(random_string=random_string())
             create_competition_body = {
+    	        "creatorHandle": bad_credentials_handle,
     	        "competitionName": competition_1_name,
-    	        "creatorHandle": bad_credentials_handle
+    	        "creatorHandle": valid_handle,
+                "category": "finals",
+                "judges": ["Alice", "Bob", "Cartman",],
+                "usersWithModificationPrivileges": [valid_handle],
+                "privacy": "private",
+                "competitorInfo": [],
             }
             create_competition_headers = {
                 "Content-Type": "application/json",
