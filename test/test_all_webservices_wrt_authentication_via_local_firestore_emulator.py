@@ -64,10 +64,9 @@ class testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator(unittest.Test
             create_competition_body = {
     	        "creatorHandle": bad_credentials_handle,
     	        "competitionName": competition_1_name,
-    	        "creatorHandle": valid_handle,
                 "category": "finals",
                 "judges": ["Alice", "Bob", "Cartman",],
-                "usersWithModificationPrivileges": [valid_handle],
+                "usersWithModificationPrivileges": [bad_credentials_handle],
                 "privacy": "private",
                 "competitorInfo": [],
             }
