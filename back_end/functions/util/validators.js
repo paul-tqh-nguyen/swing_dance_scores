@@ -1,21 +1,6 @@
 
 const { db } = require("../util/admin");
-
-const implies = (a,b) => ((!a) || b);
-
-function isString(x) { // @todo move to utilities or helper file
-    return Object.prototype.toString.call(x) === "[object String]";
-}
-
-const isEmptyString = (string) => { // @todo move to utilities or helper file
-    return (isString(string) && (string.trim() === ""));
-};
-
-const emailRegEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-const isEmail = (string) => { // @todo use some library function
-    return (string.match(emailRegEx));
-};
+const { isEmptyString, isString, isEmail, noOp } = require("../util/miscUtilities");
 
 const signupValidationErrors = (newUser) => {
     let errors = {}; // @todo abstract this out to a helper
@@ -50,19 +35,34 @@ const loginValidationErrors = (user) => {
     return errors;
 };
 
-const updateUserDataValidationErrors = (updateUserDataRequestBody) => {
-    let errors = {};
-    // @todo add a test for this validation
-    let newEmail = updateUserDataRequestBody.newEmail;
-    let password = updateUserDataRequestBody.password;
-    if (newEmail) {
-        if (!password) {
-            errors.newEmail = "Cannot update email without authentication via password.";
-        } else if (isEmptyString(password)) {
-            errors.password = "Password must not be empty.";
+const dwimUserDetails = (data) => { // @todo use more pervasively
+    let userDetails = {};
+    let complaintStrings = [];
+    Object.keys(data).forEach((key) => {
+        if (key === "organizationName") {
+            let trimmedOrganizationName = data.organizationName.trim();
+            if (isEmptyString(trimmedOrganizationName)) {
+                complaintStrings.push(`"${data.organizationName}" is not a valid organization name.`);
+            } else {
+                userDetails.organizationName = trimmedOrganizationName;
+            }
+        } else if (key === "newEmail") {
+            if (!isEmail(data.newEmail)) {
+                complaintStrings.push(`"${data.newEmail}" is not a valid email address.`);
+            }
+            if (!("password" in data)) {
+                complaintStrings.push(`Cannot update email address to "${data.newEmail}" without the current password.`);
+            }
+        } else if (key === "password") {
+            if (isEmptyString(data.password)) {
+                complaintStrings.push("Password must not be empty.");
+            }
+        } else {
+            complaintStrings.push(`"${key}" is not currently supported as a user detail.`);
         }
-    }
-    return errors;
+    });
+    let complaintString = complaintStrings.join(' ');
+    return [userDetails, complaintString];
 };
 
 const createCompetitionValidationComplaintsWRTCompetitorInfo = (competitorInfo, judges, judgesInfoIsValid) => {
@@ -120,7 +120,7 @@ const createCompetitionValidationComplaintsWRTUsersWithModificationPrivileges = 
                             return null;
                         })
                         .catch(err => {
-                            console.log(err.code);
+                            console.error(err.code);
                             usersWithModificationPrivilegesComplaints.push(`${userHandle} could not be validated as an existing user handle.`);
                             return null;
                         });
@@ -202,13 +202,4 @@ const editCompetitionValidationErrors = (competitionId, newCompetitionInfo) => {
     return errors;
 };
 
-const reduceUserDetails = (data) => { // @todo do we need this?
-    let userDetails = {};
-    if (!isEmptyString(data.organizationName.trim())) {
-        userDetails.organizationName = data.organizationName;
-    }
-    // @todo add more cases
-    return userDetails;
-};
-
-module.exports = { signupValidationErrors, loginValidationErrors, reduceUserDetails, updateUserDataValidationErrors, createCompetitionValidationErrors, editCompetitionValidationErrors, allCompetitionInfoKeysModifiableByUser};
+module.exports = { signupValidationErrors, loginValidationErrors, createCompetitionValidationErrors, editCompetitionValidationErrors, allCompetitionInfoKeysModifiableByUser, dwimUserDetails };

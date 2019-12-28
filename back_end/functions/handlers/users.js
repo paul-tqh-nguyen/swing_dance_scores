@@ -2,7 +2,8 @@
 const { firebaseConfig } = require('../util/config.js');
 const firebase = require('firebase');
 const { db, admin } = require("../util/admin");
-const { signupValidationErrors, loginValidationErrors, reduceUserDetails, updateUserDataValidationErrors } = require("../util/validators");
+const { signupValidationErrors, loginValidationErrors, dwimUserDetails } = require("../util/validators");
+const { isEmptyString, isEmail } = require("../util/miscUtilities");
 
 const noImageFileName = "no_image.png";
 
@@ -141,60 +142,96 @@ exports.uploadImage = (request, response) => {
 };
 
 exports.addUserDetails = (request, response) => {
-    let userDetails = reduceUserDetails(request.body);
-    db.doc(`/users/${request.user.handle}`).update(userDetails)
-        .then(() => {
-            // @todo is this status code right? should we use a put or update instead of a post for this?
-            return response.status(200).json({message: "Details added successfully."});
-        })
-        .catch(err => {
-            console.error(err);
-            return response.status(500).json({ error: err.code });
-        });
-};
-
-exports.updateUserData = (request, response) => {
-    let errors = updateUserDataValidationErrors(request.body);
-    if (Object.keys(errors).length>0) {
-        return response.status(400).json(errors);
-    }
-    let newEmail = request.body.newEmail;
-    let password = request.body.password;
-    if (newEmail && password) {
-        let oldEmail, docId;
-        db.doc(`/users/${request.user.handle}`).get()
-            .then(doc => {
-                if (!doc.exists) {
-                    let error = new Error(`${request.user.handle} is not a valid handle.`);
-                    throw error;
-                }
-                docId = doc.id;
-                let docData = doc.data();
-                oldEmail = docData.email;
-                return firebase.auth().signInWithEmailAndPassword(oldEmail, password);
-            })
-            .then(() => {
-                return firebase.auth().currentUser.updateEmail(newEmail);
-            })
-            .then(() => {
-                return db.collection("users").doc(docId).update({
-                    email: newEmail,
-                });
-            })
-            .then(() => {
-                return response.status(200).json({message: "Update completed successfully."});
+    let [userDetails, complaintString] = dwimUserDetails(request.body);
+    if (complaintString.length !== 0) {
+        return response.status(500).json({ error: complaintString });
+    } else {
+        db.doc(`/users/${request.user.handle}`).update(userDetails)
+            .then(() => { // @todo is this status code right? should we use a put or update instead of a post for this?
+                return response.status(200).json({message: "Details added successfully."});
             })
             .catch(err => {
                 console.error(err);
-                return response.status(500).json({
-                    error: (err.message ? err.message : err.code)
-                });
+                return response.status(500).json({ error: err.code });
             });
     }
     return null;
 };
 
-exports.getUserData = (request, response) => {
+exports.updateUserDetails = (request, response) => {
+    // @todo abstract out the chunks below
+    let [ userDetails, complaintString ] = dwimUserDetails(request.body);
+    if (complaintString.length !== 0) {
+        return response.status(500).json({ error: complaintString });
+    }
+    let handle = request.user.handle;
+    let dbUpdatePromises = [];
+    let newEmail = userDetails.newEmail;
+    let password = userDetails.password;
+    if (newEmail && password) {
+        let oldEmail, docId;
+        dbUpdatePromises.push(
+            db.doc(`/users/${handle}`).get()
+                .then(doc => {
+                    if (!doc.exists) {
+                        let error = new Error(`${handle} is not a valid handle.`);
+                        throw error;
+                    }
+                    docId = doc.id;
+                    let docData = doc.data();
+                    oldEmail = docData.email;
+                    return firebase.auth().signInWithEmailAndPassword(oldEmail, password);
+                })
+                .then(() => {
+                    return firebase.auth().currentUser.updateEmail(newEmail);
+                })
+                .then(() => {
+                    return db.collection("users").doc(docId).update({
+                        email: newEmail,
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    return response.status(500).json({
+                        error: (err.message ? err.message : err.code)
+                    });
+                }));
+    }
+    if (userDetails.organizationName) { // @todo turn this into a loop over updatable fields ; write a test as well
+        let docId;
+        dbUpdatePromises.push(
+            db.doc(`/users/${handle}`).get()
+                .then(doc => {
+                    if (!doc.exists) {
+                        let error = new Error(`${handle} is not a valid handle.`);
+                        throw error;
+                    }
+                    docId = doc.id;
+                    return db.collection("users").doc(docId).update({
+                        organizationName: userDetails.organizationName,
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    return response.status(500).json({
+                        error: (err.message ? err.message : err.code)
+                    });
+                }));
+    }
+    Promise.all(dbUpdatePromises)
+        .then(() => {
+            return response.status(200).json({message: "Update completed successfully."});
+        })
+        .catch(err => {
+            console.error(err);
+            return response.status(500).json({
+                error: (err.message ? err.message : err.code)
+            });
+        });
+    return null;
+};
+
+exports.getUserDetails = (request, response) => {
     db.doc(`/users/${request.user.handle}`)
         .get()
         .then(doc => {

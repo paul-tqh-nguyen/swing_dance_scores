@@ -142,7 +142,7 @@ class testAllWebServicesEndToEndViaLocalFireStoreEmulator(unittest.TestCase):
             # Test addUserDetails endpoint
             add_user_details_uri = urllib.parse.urljoin(api_base_uri_string, "users/addUserDetails")
             add_user_details_body = {
-    	    "organizationName": organization_name
+    	        "organizationName": organization_name
             }
             add_user_details_headers = {
                 "Content-Type": "application/json",
@@ -152,7 +152,7 @@ class testAllWebServicesEndToEndViaLocalFireStoreEmulator(unittest.TestCase):
             add_user_details_response_status_code = add_user_details_response.status_code
             self.assertEqual(200, add_user_details_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=add_user_details_uri, status_code=add_user_details_response_status_code))
     
-            # Test getUserDetails endpoint        
+            # Test getUserDetails endpoint
             get_user_details_uri = urllib.parse.urljoin(api_base_uri_string, "users/getUserDetails")
             get_user_details_headers = {
                 "Content-Type": "application/json",

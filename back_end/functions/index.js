@@ -19,14 +19,14 @@ app.get('/modifiableCompetitions', FBAuthenticate, findCompetitionsModifiableByU
 app.get('/visibleCompetitions', possiblyFBAuthenticate, findCompetitionsVisibleToUser);
 app.put('/scoreCompetition/:competitionId', FBAuthenticate, scoreCompetition);
 // Users
-const { signup, login, uploadImage, addUserDetails, getUserData, updateUserData } = require('./handlers/users');
+const { signup, login, uploadImage, addUserDetails, getUserDetails, updateUserDetails } = require('./handlers/users');
 let token, userId;
 app.post('/signup', signup);
 app.post('/login', login);
 app.post('/users/image', FBAuthenticate, uploadImage);
-app.post('/users/addUserDetails', FBAuthenticate, addUserDetails);
-app.get('/users/getUserDetails', FBAuthenticate, getUserData);
-app.post('/users/updateUserDetails', FBAuthenticate, updateUserData);
+app.post('/users/addUserDetails', FBAuthenticate, addUserDetails); // @todo this is redundant with /users/updateUserDetails ; let's get rid of this
+app.get('/users/getUserDetails', FBAuthenticate, getUserDetails);
+app.post('/users/updateUserDetails', FBAuthenticate, updateUserDetails);
 
 const functions = require('firebase-functions');
 exports.api = functions.https.onRequest(app);

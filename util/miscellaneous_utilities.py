@@ -29,6 +29,7 @@ import warnings
 import sys
 import logging
 import socket
+import time
 from typing import List
 
 ###################
@@ -86,13 +87,12 @@ def debug_log(input_to_log='') -> None:
 def extract_stdout_from_subprocess(subprocess, time_limit: int=3) -> List[str]:
     """subprocess is of the type returned by subprocess.Popen"""
     lines = []
-    with timeout(time_limit, lambda: warnings.warn("Time limit of {time_limit} seconds reached when trying to extract the STDOUT from {subprocess}.".format(time_limit=time_limit, subprocess=subprocess))):
+    with timeout(time_limit, lambda: warnings.warn("Time limit of {time_limit} seconds reached when trying to extract the STDOUT from {subprocess} at {timestamp}.".format(time_limit=time_limit, subprocess=subprocess, timestamp=current_timestamp_string()))):
         while True:
             line = subprocess.stdout.readline()
             if not line:
                 break
             lines.append(line)
-    
     stdout_text = ''.join(lines)
     return stdout_text
 

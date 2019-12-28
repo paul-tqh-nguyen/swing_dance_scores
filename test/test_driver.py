@@ -32,6 +32,7 @@ from .test_all_webservices_wrt_authentication_via_local_firestore_emulator impor
 from .test_all_webservices_end_to_end_via_deployed_app import testAllWebServicesEndToEndViaDeployedApp
 from .test_db_has_few_test_user_accounts import testDBHasFewTestUserAccounts
 from .test_sign_up_webservice_via_local_firestore_emulator import testSignUpWebserviceViaLocalFirestoreEmulator
+from .test_update_user_details_via_local_firestore_emulator import testUpdateUserDetailsViaLocalFirestoreEmulator
 
 ###############
 # Main Runner #
@@ -104,18 +105,19 @@ def _possibly_remove_all_test_users_from_production_db():
 
 def run_all_tests():
     _possibly_kill_process_using_port_number(5001)
-    _possibly_kill_process_using_port_number(9090)
+    _possibly_kill_process_using_port_number(5000)
     _possibly_remove_all_test_users_from_production_db()
     print()
     print("Running our test suite.")
     print()
     loader = unittest.TestLoader()
     tests = [
-        loader.loadTestsFromTestCase(testSignUpWebserviceViaLocalFirestoreEmulator),
-        loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
-        loader.loadTestsFromTestCase(testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator),
-        loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaDeployedApp),
-        loader.loadTestsFromTestCase(testDBHasFewTestUserAccounts),
+        # loader.loadTestsFromTestCase(testSignUpWebserviceViaLocalFirestoreEmulator),
+        # loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
+        # loader.loadTestsFromTestCase(testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator),
+        loader.loadTestsFromTestCase(testUpdateUserDetailsViaLocalFirestoreEmulator),
+        #loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaDeployedApp),
+        # loader.loadTestsFromTestCase(testDBHasFewTestUserAccounts),
     ]
     suite = unittest.TestSuite(tests)
     runner = unittest.TextTestRunner(verbosity=2)
