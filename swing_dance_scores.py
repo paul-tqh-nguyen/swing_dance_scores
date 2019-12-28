@@ -37,7 +37,15 @@ from util.miscellaneous_utilities import *
 ###############
 
 def _deploy():
-    raise NotImplementedError("Support for -deploy is not yet implemented.")
+    print()
+    print("Deploying back end...")
+    print()
+    back_end_deployment_command = "cd back_end && firebase deploy"
+    subprocess.check_call(back_end_deployment_command, shell=True)
+    print()
+    print("Deploying front end...")
+    print()
+    raise NotImplementedError("Support for -deploy is not yet implemented for the front end...")
     return None
 
 def _start_development_servers():

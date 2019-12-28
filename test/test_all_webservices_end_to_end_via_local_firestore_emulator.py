@@ -187,7 +187,6 @@ class testAllWebServicesEndToEndViaLocalFireStoreEmulator(unittest.TestCase):
             print("Below is the output of the local firestore:\n\n{firestore_stdout}".format(firestore_stdout=extract_stdout_from_subprocess(firestore_emulation_process)))
             raise error
 
-
 ###############
 # Main Runner #
 ###############

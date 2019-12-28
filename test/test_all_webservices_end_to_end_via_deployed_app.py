@@ -21,25 +21,26 @@ File Organization:
 # Imports #
 ###########
 
+# @todo sweep these
 import sys; sys.path.append(".."); from util.miscellaneous_utilities import *
 from .test_utilities import *
 import unittest
 # import subprocess
 # import os
 # import signal
-# import requests
-# import urllib.parse
-# import json
+import requests
+import urllib.parse
+import json
 # import time
 
 #########
 # Tests #
 #########
 
-API_BASE_URI_STRING = "https://us-central1-swing-dance-scores.cloudfunctions.net/api/"
-
 class testAllWebServicesEndToEndViaDeployedApp(unittest.TestCase): 
     def testAllWebServicesEndToEndViaDeployedApp(self):
+        api_base_uri_string = "https://us-central1-swing-dance-scores.cloudfunctions.net/api/"
+        
         test_handle, test_email, test_password = generate_new_test_email_and_password_and_user_handle()
         
         # Test signup endpoint
@@ -53,7 +54,7 @@ class testAllWebServicesEndToEndViaDeployedApp(unittest.TestCase):
         signup_headers = {'Content-Type': 'application/json'}
         signup_response = requests.post(signup_uri, data=json.dumps(signup_body), headers=signup_headers)
         signup_response_status_code = signup_response.status_code
-        self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=get_all_competitions_uri, status_code=signup_response_status_code))
+        self.assertEqual(201, signup_response_status_code, msg="Failed to hit the endpoint at {uri} as we got the status code of {status_code}".format(uri=signup_uri, status_code=signup_response_status_code))
         signup_response_json_string = signup_response.content
         signup_response_dict = json.loads(signup_response_json_string)
         self.assertTrue('token' in signup_response_dict, msg="We got an unexpected result from the endpoint at {uri} as we got {result}".format(uri=signup_uri, result=signup_response_dict))

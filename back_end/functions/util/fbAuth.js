@@ -49,7 +49,7 @@ const possiblyFBAuthenticate = (request, response, next) => {
                 return next();
             });
     } else {
-        next();
+        return next();
     }
     return null;
 };
