@@ -2,7 +2,7 @@
 
 """
 
-This module contains an end-to-end integration test intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ work as intended via a local firestore emulator.
+This module contains an end-to-end integration test intended to verify that all the webservices for https://github.com/paul-tqh-nguyen/swing_dance_scores/ works as intended via a local firestore emulator.
 
 Owner : paul-tqh-nguyen
 

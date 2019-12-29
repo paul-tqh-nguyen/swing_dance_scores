@@ -33,6 +33,7 @@ from .test_all_webservices_end_to_end_via_deployed_app import testAllWebServices
 from .test_db_has_few_test_user_accounts import testDBHasFewTestUserAccounts
 from .test_sign_up_webservice_via_local_firestore_emulator import testSignUpWebserviceViaLocalFirestoreEmulator
 from .test_update_user_details_via_local_firestore_emulator import testUpdateUserDetailsViaLocalFirestoreEmulator
+from .test_login_via_local_firestore_emulator import testLoginViaLocalFirestoreEmulator
 
 ###############
 # Main Runner #
@@ -112,11 +113,12 @@ def run_all_tests():
     print()
     loader = unittest.TestLoader()
     tests = [
+        loader.loadTestsFromTestCase(testLoginViaLocalFirestoreEmulator)
         # loader.loadTestsFromTestCase(testSignUpWebserviceViaLocalFirestoreEmulator),
         # loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
         # loader.loadTestsFromTestCase(testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator),
-        loader.loadTestsFromTestCase(testUpdateUserDetailsViaLocalFirestoreEmulator),
-        #loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaDeployedApp),
+        # loader.loadTestsFromTestCase(testUpdateUserDetailsViaLocalFirestoreEmulator),
+        # loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaDeployedApp),
         # loader.loadTestsFromTestCase(testDBHasFewTestUserAccounts),
     ]
     suite = unittest.TestSuite(tests)
