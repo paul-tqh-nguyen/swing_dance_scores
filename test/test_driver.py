@@ -35,6 +35,7 @@ from .test_sign_up_webservice_via_local_firestore_emulator import testSignUpWebs
 from .test_update_user_details_via_local_firestore_emulator import testUpdateUserDetailsViaLocalFirestoreEmulator
 from .test_login_via_local_firestore_emulator import testLoginViaLocalFirestoreEmulator
 from .test_create_competition_and_find_competition_by_id_via_local_firestore_emulator import testCreateCompetitionAndFindCompetitionByIdViaLocalFirestoreEmulator
+from .test_find_visible_and_modifiable_competitions_webservice_via_local_firestore_emulator import testFindVisibleAndModifiableCompetitionsWebserviceViaLocalFirestoreEmulator
 
 ###############
 # Main Runner #
@@ -114,8 +115,9 @@ def run_all_tests():
     print()
     loader = unittest.TestLoader()
     tests = [
-        # loader.loadTestsFromTestCase(testLoginViaLocalFirestoreEmulator)
-        loader.loadTestsFromTestCase(testCreateCompetitionAndFindCompetitionByIdViaLocalFirestoreEmulator)
+        # loader.loadTestsFromTestCase(testLoginViaLocalFirestoreEmulator),
+        # loader.loadTestsFromTestCase(testCreateCompetitionAndFindCompetitionByIdViaLocalFirestoreEmulator),
+        loader.loadTestsFromTestCase(testFindVisibleAndModifiableCompetitionsWebserviceViaLocalFirestoreEmulator),
         # loader.loadTestsFromTestCase(testSignUpWebserviceViaLocalFirestoreEmulator),
         # loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
         # loader.loadTestsFromTestCase(testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator),

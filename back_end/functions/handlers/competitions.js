@@ -152,8 +152,10 @@ exports.findCompetitionsVisibleToUser = (request, response) => {
         .then(publicCompetitionInfosAndModifiableCompetitionInfos => {
             let publicCompetitionInfos, modifiableCompetitionInfos; 
             [ publicCompetitionInfos, modifiableCompetitionInfos] = publicCompetitionInfosAndModifiableCompetitionInfos;
-            let visibleCompetitionInfos = publicCompetitionInfos.concat(modifiableCompetitionInfos);
-            return response.status(200).json(visibleCompetitionInfos);
+            let competitionIdToVisibleCompetitionInfoMap = new Object();
+            publicCompetitionInfos.forEach(modifiableCompetitionInfo => competitionIdToVisibleCompetitionInfoMap[modifiableCompetitionInfo["competitionId"]] = modifiableCompetitionInfo);
+            modifiableCompetitionInfos.forEach(modifiableCompetitionInfo => competitionIdToVisibleCompetitionInfoMap[modifiableCompetitionInfo["competitionId"]] = modifiableCompetitionInfo);
+            return response.status(200).json(Object.values(competitionIdToVisibleCompetitionInfoMap));
         })
         .catch(error => {
             console.error(error);
