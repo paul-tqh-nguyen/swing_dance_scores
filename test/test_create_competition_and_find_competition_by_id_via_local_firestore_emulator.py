@@ -83,7 +83,7 @@ class testCreateCompetitionAndFindCompetitionByIdViaLocalFirestoreEmulator(unitt
             create_competition_body = {
     	        "competitionName": competition_name,
     	        "creatorHandle": test_handle,
-                "category": "finals",
+                "category": category,
                 "judges": judges,
                 "usersWithModificationPrivileges": [test_handle],
                 "privacy": privacy,
@@ -115,7 +115,7 @@ class testCreateCompetitionAndFindCompetitionByIdViaLocalFirestoreEmulator(unitt
                              msg="Unexpected competitionName value for the first competition created in {result}.".format(result=only_competition))
             self.assertTrue("creatorHandle" in only_competition, msg="Competition malformed as no creator handle was specified. The competition info is {result}.".format(result=only_competition))
             self.assertEqual(only_competition["creatorHandle"], test_handle, msg="Unexpected creatorHandle value for the first competition created in {result}.".format(result=only_competition))
-            self.assertTrue("category" in only_competition and only_competition["category"], msg="We could not gather the competition category set (i.e. {category}) when we created the competition. The competition data is {competition_data} ".format(category=category, competition_data=json.dumps(only_competition)))
+            self.assertTrue("category" in only_competition and only_competition["category"]==category, msg="We could not gather the competition category set (i.e. {category}) when we created the competition. The competition data is {competition_data} ".format(category=category, competition_data=json.dumps(only_competition)))
             self.assertTrue("judges" in only_competition and set(only_competition["judges"])==set(judges),
                             msg="We could not gather the judges set (i.e. {judges}) when we created the competition. The competition data is {competition_data} ".format(judges=", ".join(judges), competition_data=json.dumps(only_competition)))
             self.assertTrue("usersWithModificationPrivileges" in only_competition and only_competition["usersWithModificationPrivileges"]==[test_handle],
