@@ -41,7 +41,10 @@ exports.createCompetition = (request, response) => {
             });
             return userUpdatePromises;
         }).then(()=>{
-            return response.status(201).json({message: `Competition ${newCompetitionId} created successfully.`});
+            return response.status(201).json({
+                message: `Competition ${newCompetitionId} created successfully.`,
+                competitionId: newCompetitionId
+            });
         })    
         .catch((error) => {
             console.error(error);
