@@ -125,6 +125,22 @@ class testCompetitionEditViaLocalFirestoreEmulator(unittest.TestCase):
             self.assertTrue("competitorInfo" in only_competition and only_competition["competitorInfo"]==competition_competitor_info, msg="We could not gather the competitor information set (i.e. {competitorInfo}) when we created the competition. The competition data is {competition_data} ".format(competitorInfo=competition_competitor_info, competition_data=json.dumps(only_competition)))
             self.assertTrue("competitionId" in only_competition and only_competition["competitionId"]==competition_id, msg="We could not gather the competition ID retrieved (i.e. {competition_id}) when we created the competition. The competition data is {competition_data} ".format(competition_id=competition_id, competition_data=json.dumps(only_competition)))
 
+            # Verify that we CANNOT find the competition by ID without authentication
+            find_competition_uri = urllib.parse.urljoin(api_base_uri_string, "competition/{competition_id}".format(competition_id=competition_id))
+            find_competition_response = requests.get(find_competition_uri)
+            find_competition_response_status_code = find_competition_response.status_code
+            self.assertEqual(500, find_competition_response_status_code, msg="We expect to not be able to access the competition with ID {competition_id} via {uri} and get a failure status code of 500; we got {status_code} instead.".format(competition_id=competition_id, uri=find_competition_uri, status_code=find_competition_response_status_code))
+            
+            # Verify that we CANNOT find the competition by ID with bogus authentication
+            find_competition_uri = urllib.parse.urljoin(api_base_uri_string, "competition/{competition_id}".format(competition_id=competition_id))
+            bogus_find_competition_headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {token}".format(token=access_token[::-1])
+            }
+            find_competition_response = requests.get(find_competition_uri, headers=bogus_find_competition_headers)
+            find_competition_response_status_code = find_competition_response.status_code
+            self.assertEqual(500, find_competition_response_status_code, msg="We expect to not be able to access the competition with ID {competition_id} via {uri} and get a failure status code of 500; we got {status_code} instead.".format(competition_id=competition_id, uri=find_competition_uri, status_code=find_competition_response_status_code))
+
             # Edit the competition to make it public
             new_competition_privacy = "public"
             edit_competition_uri = urllib.parse.urljoin(api_base_uri_string, "competition/{competition_id}".format(competition_id=competition_id))
