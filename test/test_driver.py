@@ -36,6 +36,7 @@ from .test_update_user_details_via_local_firestore_emulator import testUpdateUse
 from .test_login_via_local_firestore_emulator import testLoginViaLocalFirestoreEmulator
 from .test_create_competition_and_find_competition_by_id_via_local_firestore_emulator import testCreateCompetitionAndFindCompetitionByIdViaLocalFirestoreEmulator
 from .test_find_visible_and_modifiable_competitions_webservice_via_local_firestore_emulator import testFindVisibleAndModifiableCompetitionsWebserviceViaLocalFirestoreEmulator
+from .test_competition_edit_via_local_firestore_emulator import testCompetitionEditViaLocalFirestoreEmulator
 
 ###############
 # Main Runner #
@@ -117,7 +118,8 @@ def run_all_tests():
     tests = [
         # loader.loadTestsFromTestCase(testLoginViaLocalFirestoreEmulator),
         # loader.loadTestsFromTestCase(testCreateCompetitionAndFindCompetitionByIdViaLocalFirestoreEmulator),
-        loader.loadTestsFromTestCase(testFindVisibleAndModifiableCompetitionsWebserviceViaLocalFirestoreEmulator),
+        # loader.loadTestsFromTestCase(testFindVisibleAndModifiableCompetitionsWebserviceViaLocalFirestoreEmulator),
+        loader.loadTestsFromTestCase(testCompetitionEditViaLocalFirestoreEmulator),
         # loader.loadTestsFromTestCase(testSignUpWebserviceViaLocalFirestoreEmulator),
         # loader.loadTestsFromTestCase(testAllWebServicesEndToEndViaLocalFireStoreEmulator),
         # loader.loadTestsFromTestCase(testAllWebServicesWrtAuthenticationViaLocalFireStoreEmulator),

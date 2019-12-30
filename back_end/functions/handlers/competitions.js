@@ -179,7 +179,10 @@ exports.editCompetition = (request, response) => { // @todo add a test that make
     return db.doc(`/unscoredCompetitions/${competitionId}`)
         .update(updatedCompetitionInfo)
         .then(()=>{
-            return response.status(200).json({message: `Competition ${competitionId} updated successfully.`}); // @todo figure out if there's a better status code
+            return response.status(200).json({ // @todo figure out if there's a better status code
+                message: `Competition ${competitionId} updated successfully.`,
+                competitionId: competitionId
+            });
         })    
         .catch((error) => {
             let humanReadableErrorString = `We hit an error while editing competition ${competitionId}! ${(error.message ? error.message : error.code)}`;
